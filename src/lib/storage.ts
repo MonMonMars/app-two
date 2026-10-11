@@ -19,6 +19,10 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   blockedProfileIds: [],
   streakCount: 0,
   streakDayKey: todayKey(),
+  subscriptionStatus: "none",
+  subscriptionRenewalAt: null,
+  discoverCoachDismissed: false,
+  pushSoftPrompt: "idle",
 };
 
 export function normalizePersistedState(
@@ -31,6 +35,17 @@ export function normalizePersistedState(
       partial.blockedProfileIds ?? DEFAULT_PERSISTED_STATE.blockedProfileIds,
     streakCount: partial.streakCount ?? DEFAULT_PERSISTED_STATE.streakCount,
     streakDayKey: partial.streakDayKey ?? DEFAULT_PERSISTED_STATE.streakDayKey,
+    subscriptionStatus:
+      partial.subscriptionStatus ?? DEFAULT_PERSISTED_STATE.subscriptionStatus,
+    subscriptionRenewalAt:
+      partial.subscriptionRenewalAt !== undefined
+        ? partial.subscriptionRenewalAt
+        : DEFAULT_PERSISTED_STATE.subscriptionRenewalAt,
+    discoverCoachDismissed:
+      partial.discoverCoachDismissed ??
+      DEFAULT_PERSISTED_STATE.discoverCoachDismissed,
+    pushSoftPrompt:
+      partial.pushSoftPrompt ?? DEFAULT_PERSISTED_STATE.pushSoftPrompt,
     boostActiveUntil:
       partial.boostActiveUntil !== undefined
         ? partial.boostActiveUntil

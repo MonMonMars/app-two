@@ -1,5 +1,6 @@
 "use client";
 
+import { requiresOnboardingRedirect } from "@/lib/onboarding-gate-logic";
 import { useProfile } from "@/context/profile-provider";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -13,10 +14,7 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
     if (!hydrated || !datingProfile) {
       return;
     }
-    if (
-      !datingProfile.onboardingComplete &&
-      !pathname.startsWith("/onboarding")
-    ) {
+    if (requiresOnboardingRedirect(datingProfile, pathname)) {
       router.replace("/onboarding");
     }
   }, [hydrated, datingProfile, pathname, router]);

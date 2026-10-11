@@ -79,6 +79,10 @@ export type AppSettings = {
   notifications: NotificationSettings;
 };
 
+export type SubscriptionStatus = "none" | "active" | "canceled";
+
+export type PushSoftPromptState = "idle" | "eligible" | "dismissed";
+
 export type AppPersistedState = {
   passedIds: string[];
   likedIds: string[];
@@ -92,6 +96,10 @@ export type AppPersistedState = {
   blockedProfileIds: string[];
   streakCount: number;
   streakDayKey: string;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionRenewalAt: string | null;
+  discoverCoachDismissed: boolean;
+  pushSoftPrompt: PushSoftPromptState;
 };
 
 export type SubscriptionPlan = {

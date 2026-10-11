@@ -17,6 +17,19 @@ import {
   loadPersistedState,
   savePersistedState,
 } from "@/lib/storage";
+import { hasPaidTier } from "@/lib/premium-gating";
+import {
+  activateSubscription,
+  cancelSubscriptionMock,
+  reactivateSubscriptionMock,
+} from "@/lib/subscription-manage";
+import {
+  addBlockedProfileId,
+  filterMatchIdsAfterUnmatch,
+  filterMatchesAfterBlock,
+  recordMockReport,
+  removeBlockedProfileId,
+} from "@/lib/safety-effects";
 import { touchDailyStreak } from "@/lib/streak";
 import type {
   AppPersistedState,
@@ -24,7 +37,9 @@ import type {
   Match,
   MonetizationProduct,
   Profile,
+  PushSoftPromptState,
   ReportReason,
+  SubscriptionStatus,
   SubscriptionTier,
 } from "@/types";
 import {
@@ -74,15 +89,19 @@ type AppContextValue = {
   debugResetLocalData: () => void;
   debugGrantPremium: () => void;
   debugRefillConsumables: () => void;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionRenewalAt: string | null;
+  discoverCoachDismissed: boolean;
+  pushSoftPrompt: PushSoftPromptState;
+  dismissDiscoverCoach: () => void;
+  dismissPushSoftPrompt: () => void;
+  cancelSubscription: () => void;
+  reactivateSubscription: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 const FREE_DAILY_LIKE_LIMIT = 25;
-
-function hasPaidTier(tier: SubscriptionTier): boolean {
-  return tier === "premium" || tier === "premium_plus";
-}
 
 function buildMatchesFromIds(matchIds: string[], existing: Match[]): Match[] {
   const byId = new Map(existing.map((m) => [m.id, m]));
@@ -179,8 +198,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
 
   const visibleMatches = useMemo(
-    () => matches.filter((m) => !blockedSet.has(m.profile.id)),
-    [matches, blockedSet],
+    () => filterMatchesAfterBlock(matches, persisted.blockedProfileIds),
+    [matches, persisted.blockedProfileIds],
   );
 
   const canLike = useMemo(() => {
@@ -258,6 +277,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         matchIds: s.matchIds.includes(matchId)
           ? s.matchIds
           : [matchId, ...s.matchIds],
+        pushSoftPrompt:
+          s.pushSoftPrompt === "idle" ? "eligible" : s.pushSoftPrompt,
       }));
 
       setLastSwipe({ profileId, action: "like", createdMatchId: matchId });
@@ -407,16 +428,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const blockProfile = useCallback((profileId: string) => {
     setPersisted((s) => ({
       ...s,
-      blockedProfileIds: s.blockedProfileIds.includes(profileId)
-        ? s.blockedProfileIds
-        : [...s.blockedProfileIds, profileId],
+      blockedProfileIds: addBlockedProfileId(s.blockedProfileIds, profileId),
     }));
   }, []);
 
   const unblockProfile = useCallback((profileId: string) => {
     setPersisted((s) => ({
       ...s,
-      blockedProfileIds: s.blockedProfileIds.filter((id) => id !== profileId),
+      blockedProfileIds: removeBlockedProfileId(s.blockedProfileIds, profileId),
     }));
   }, []);
 
@@ -425,13 +444,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMessages((prev) => prev.filter((m) => m.matchId !== matchId));
     setPersisted((s) => ({
       ...s,
-      matchIds: s.matchIds.filter((id) => id !== matchId),
+      matchIds: filterMatchIdsAfterUnmatch(s.matchIds, matchId),
     }));
   }, []);
 
   const reportProfile = useCallback(
-    (_profileId: string, _reason: ReportReason) => {
-      /* mock — no backend */
+    (_profileId: string, reason: ReportReason) => {
+      recordMockReport(reason);
     },
     [],
   );
@@ -444,17 +463,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPersisted((s) => {
       switch (product) {
         case "premium_monthly":
-          return {
-            ...s,
-            tier: "premium",
-            boostsRemaining: s.boostsRemaining + 1,
-          };
+          return activateSubscription(
+            {
+              ...s,
+              tier: "premium",
+              boostsRemaining: s.boostsRemaining + 1,
+            },
+            "monthly",
+          );
         case "premium_annual":
-          return {
-            ...s,
-            tier: "premium_plus",
-            boostsRemaining: s.boostsRemaining + 2,
-          };
+          return activateSubscription(
+            {
+              ...s,
+              tier: "premium_plus",
+              boostsRemaining: s.boostsRemaining + 2,
+            },
+            "annual",
+          );
         case "boost":
           return { ...s, boostsRemaining: s.boostsRemaining + 1 };
         case "super_like_pack":
@@ -465,6 +490,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+  }, []);
+
+  const dismissDiscoverCoach = useCallback(() => {
+    setPersisted((s) => ({ ...s, discoverCoachDismissed: true }));
+  }, []);
+
+  const dismissPushSoftPrompt = useCallback(() => {
+    setPersisted((s) => ({ ...s, pushSoftPrompt: "dismissed" }));
+  }, []);
+
+  const cancelSubscription = useCallback(() => {
+    setPersisted((s) => cancelSubscriptionMock(s));
+  }, []);
+
+  const reactivateSubscription = useCallback(() => {
+    setPersisted((s) => reactivateSubscriptionMock(s));
   }, []);
 
   const resetAppState = useCallback(() => {
@@ -483,12 +524,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [resetAppState]);
 
   const debugGrantPremium = useCallback(() => {
-    setPersisted((s) => ({
-      ...s,
-      tier: "premium",
-      boostsRemaining: Math.max(s.boostsRemaining, 3),
-      superLikesRemaining: Math.max(s.superLikesRemaining, 5),
-    }));
+    setPersisted((s) =>
+      activateSubscription(
+        {
+          ...s,
+          tier: "premium",
+          boostsRemaining: Math.max(s.boostsRemaining, 3),
+          superLikesRemaining: Math.max(s.superLikesRemaining, 5),
+        },
+        "monthly",
+      ),
+    );
   }, []);
 
   const debugRefillConsumables = useCallback(() => {
@@ -532,6 +578,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     debugResetLocalData,
     debugGrantPremium,
     debugRefillConsumables,
+    subscriptionStatus: persisted.subscriptionStatus,
+    subscriptionRenewalAt: persisted.subscriptionRenewalAt,
+    discoverCoachDismissed: persisted.discoverCoachDismissed,
+    pushSoftPrompt: persisted.pushSoftPrompt,
+    dismissDiscoverCoach,
+    dismissPushSoftPrompt,
+    cancelSubscription,
+    reactivateSubscription,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

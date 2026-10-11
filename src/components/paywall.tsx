@@ -1,12 +1,31 @@
 "use client";
 
+import { ConsumableShop } from "@/components/consumable-shop";
 import { SubscriptionTiers } from "@/components/subscription-tiers";
 import { useApp } from "@/context/app-provider";
 import type { MonetizationProduct } from "@/types";
+import Link from "next/link";
 import { useState } from "react";
 
+function purchaseStatusMessage(product: MonetizationProduct): string {
+  switch (product) {
+    case "premium_monthly":
+      return "Premium activated (mock). Rewind and unlimited likes unlocked.";
+    case "premium_annual":
+      return "Premium+ activated (mock). Best value tier applied.";
+    case "boost":
+      return "Boost added — inventory updated below.";
+    case "super_like_pack":
+      return "Super Like pack added — inventory updated below.";
+    default: {
+      const _exhaustive: never = product;
+      return _exhaustive;
+    }
+  }
+}
+
 export function Paywall() {
-  const { tier, boostsRemaining, applyProductPurchase } = useApp();
+  const { tier, applyProductPurchase } = useApp();
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState<MonetizationProduct | null>(null);
 
@@ -28,7 +47,7 @@ export function Paywall() {
 
       if (data.mode === "mock") {
         applyProductPurchase(product);
-        setStatus(data.message ?? "Purchase simulated (test mode).");
+        setStatus(data.message ?? purchaseStatusMessage(product));
       } else if (data.url) {
         window.location.href = data.url;
       } else {
@@ -54,6 +73,12 @@ export function Paywall() {
           Stripe test-mode is stubbed via env placeholders. Default setup runs
           mock checkout — grants apply instantly in the browser.
         </p>
+        <Link
+          href="/premium/manage"
+          className="mt-3 inline-block text-sm font-semibold text-rose-200 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400"
+        >
+          Manage subscription →
+        </Link>
       </section>
 
       <SubscriptionTiers
@@ -62,44 +87,11 @@ export function Paywall() {
         onSelect={checkout}
       />
 
-      <section className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
-          <h3 className="font-semibold text-white">Profile Boost</h3>
-          <p className="mt-1 text-sm text-zinc-400">
-            Be seen first for 30 minutes.{" "}
-            <strong className="text-zinc-200">{boostsRemaining}</strong>{" "}
-            available.
-          </p>
-          <button
-            type="button"
-            disabled={loading !== null}
-            onClick={() => checkout("boost")}
-            className="mt-3 w-full rounded-full border border-rose-500/40 py-2.5 text-sm font-semibold text-rose-300"
-          >
-            {loading === "boost" ? "…" : "Buy boost — $4.99"}
-          </button>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
-          <h3 className="font-semibold text-white">Super Like Pack</h3>
-          <p className="mt-1 text-sm text-zinc-400">
-            5 Super Likes to stand out.
-          </p>
-          <button
-            type="button"
-            disabled={loading !== null}
-            onClick={() => checkout("super_like_pack")}
-            className="mt-3 w-full rounded-full border border-rose-500/40 py-2.5 text-sm font-semibold text-rose-300"
-          >
-            {loading === "super_like_pack" ? "…" : "Buy pack — $2.99"}
-          </button>
-        </div>
-      </section>
-
-      {status ? (
-        <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-          {status}
-        </p>
-      ) : null}
+      <ConsumableShop
+        loadingProduct={loading}
+        onPurchase={checkout}
+        lastPurchaseMessage={status}
+      />
     </div>
   );
 }

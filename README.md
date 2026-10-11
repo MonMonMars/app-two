@@ -28,6 +28,17 @@ npm run dev
 
 ## Changelog
 
+### Wave 5
+
+- **`/premium/manage`** — current plan, mock renewal date, cancel / reactivate stubs, consumable inventory summary
+- **Consumable shop** — Boost + Super Like packs with live inventory after mock purchase
+- **Discover coach marks** — dismissible first-session tips (persisted in app state)
+- **Push soft prompt** — UI stub after first new match (no real push APIs)
+- **Offline banner** when `navigator.onLine` is false; optional production **`/sw.js`** registration (no asset caching)
+- **Accessibility** — skip-to-content link, banner/main/nav landmarks, higher-contrast primary CTAs
+- **Tests** — 30+ cases covering premium gating, onboarding gate, safety/block/report helpers, subscription manage
+- **Deploy docs** — Vercel one-click notes; App Router (not static export)
+
 ### Wave 4
 
 - **Landing** at `/` for logged-out users (hero, features, CTAs) with SEO + Open Graph placeholders
@@ -76,7 +87,8 @@ npm run dev
 | Settings           | `/settings`              | Notifications, block list, legal, mock delete     |
 | Likes You          | `/likes-you`             | Free blur vs Premium reveal (demo likes)          |
 | Matches / chat     | `/matches`, `/chat/[id]` | Typing, read receipts, image stub, safety actions |
-| Premium            | `/premium`               | Stripe checkout stub                              |
+| Premium            | `/premium`               | Stripe checkout stub + consumable shop            |
+| Manage plan        | `/premium/manage`        | Mock renewal, cancel/reactivate                   |
 
 ### Onboarding collects
 
@@ -126,9 +138,32 @@ src/i18n/          English string map (scaffolding)
 public/            PWA manifest + icon/OG placeholders
 ```
 
-## Deploy
+## Deploy (Vercel)
 
-**Vercel** recommended (API routes + env vars). GitHub Pages needs static export and loses API routes.
+App Two uses the **Next.js App Router** with API routes (`/api/auth`, `/api/stripe`). Do **not** set `output: "export"` — static export breaks auth/checkout stubs.
+
+1. Import [MonMonMars/app-two](https://github.com/MonMonMars/app-two) in [Vercel](https://vercel.com/new) (framework preset: **Next.js** — no custom `vercel.json` required).
+2. Set env vars from `.env.example` (`NEXT_PUBLIC_APP_URL` = your production URL).
+3. Deploy — `npm run build` runs automatically; Node 20 matches CI.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMonMonMars%2Fapp-two)
+
+GitHub Pages / pure static hosts are unsupported unless you remove API routes.
+
+## Screenshot placeholders (capture later)
+
+| Screen               | Route               | Notes                        |
+| -------------------- | ------------------- | ---------------------------- |
+| Marketing landing    | `/`                 | Hero + feature cards         |
+| Discover coach marks | `/discover`         | Tips overlay before dismiss  |
+| Multi-photo card     | `/discover`         | Dot indicators + swipe       |
+| Likes You blur       | `/likes-you`        | Free tier grid               |
+| Premium shop         | `/premium`          | Tiers + consumable inventory |
+| Manage subscription  | `/premium/manage`   | Renewal + cancel stub        |
+| Push soft prompt     | `/discover`         | After first new match        |
+| Public profile link  | `/u/p1`             | Share preview                |
+| Chat safety          | `/chat/m-seed-1`    | Typing + read receipt        |
+| Debug panel          | `/discover?debug=1` | QA tools                     |
 
 ## CI
 

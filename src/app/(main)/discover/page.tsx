@@ -1,3 +1,4 @@
+import { DiscoverCoachMarks } from "@/components/discover-coach-marks";
 import { DiscoverFiltersPanel } from "@/components/discover-filters-panel";
 import { DiscoverScreen } from "@/components/discover-screen";
 import { SelfPreviewCard } from "@/components/self-preview-card";
@@ -7,6 +8,7 @@ export default function DiscoverPage() {
   return (
     <div className="flex flex-1 flex-col">
       <StreakBanner />
+      <DiscoverCoachMarks />
       <SelfPreviewCard />
       <DiscoverFiltersPanel />
       <DiscoverScreen />
