@@ -2,26 +2,29 @@
 
 import { useProfile } from "@/context/profile-provider";
 import { BOOST_DURATION_MS } from "@/lib/constants";
-import { profileMatchesDiscoverFilters } from "@/lib/discover-filter";
+import { buildDiscoverDeck } from "@/lib/deck-logic";
+import { createsMutualMatch } from "@/lib/match-logic";
 import {
   INITIAL_MATCHES,
   INITIAL_MESSAGES,
-  MATCH_ON_LIKE_IDS,
   MOCK_PROFILES,
   profileById,
   randomAutoReply,
+  CHAT_IMAGE_STUB_URL,
 } from "@/lib/mock-data";
 import {
   DEFAULT_PERSISTED_STATE,
   loadPersistedState,
   savePersistedState,
 } from "@/lib/storage";
+import { touchDailyStreak } from "@/lib/streak";
 import type {
   AppPersistedState,
   ChatMessage,
   Match,
   MonetizationProduct,
   Profile,
+  ReportReason,
   SubscriptionTier,
 } from "@/types";
 import {
@@ -41,23 +44,32 @@ type AppContextValue = {
   boostsRemaining: number;
   superLikesRemaining: number;
   boostActiveUntil: string | null;
+  streakCount: number;
   deck: Profile[];
-  deckEmptyReason: "filters" | "caught_up" | null;
+  deckEmptyReason: "filters" | "caught_up" | "blocked" | null;
   matches: Match[];
   messages: ChatMessage[];
+  blockedProfileIds: string[];
+  typingMatchId: string | null;
   dailyLikeLimit: number;
   likesUsedToday: number;
   canLike: boolean;
+  hasLastSwipe: boolean;
   passProfile: (profileId: string) => void;
   likeProfile: (
     profileId: string,
     options?: { super?: boolean },
   ) => Match | null;
-  rewindLastSwipe: () => void;
+  rewindLastSwipe: () => boolean;
   sendMessage: (matchId: string, body: string) => void;
+  sendImageMessage: (matchId: string) => void;
   activateBoost: () => boolean;
   setPremiumTier: (tier: SubscriptionTier) => void;
   applyProductPurchase: (product: MonetizationProduct) => void;
+  blockProfile: (profileId: string) => void;
+  unblockProfile: (profileId: string) => void;
+  unmatch: (matchId: string) => void;
+  reportProfile: (profileId: string, reason: ReportReason) => void;
   resetAppState: () => void;
 };
 
@@ -101,6 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [matches, setMatches] = useState<Match[]>(INITIAL_MATCHES);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [typingMatchId, setTypingMatchId] = useState<string | null>(null);
   const [lastSwipe, setLastSwipe] = useState<{
     profileId: string;
     action: "like" | "pass";
@@ -108,7 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   } | null>(null);
 
   useEffect(() => {
-    const loaded = clearExpiredBoost(loadPersistedState());
+    const loaded = touchDailyStreak(clearExpiredBoost(loadPersistedState()));
     startTransition(() => {
       setPersisted(loaded);
       setMatches((prev) => {
@@ -139,29 +152,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id);
   }, []);
 
-  const { deck, deckEmptyReason } = useMemo((): {
-    deck: Profile[];
-    deckEmptyReason: "filters" | "caught_up" | null;
-  } => {
-    const seen = new Set([...persisted.passedIds, ...persisted.likedIds]);
-    const unseen = MOCK_PROFILES.filter((p) => !seen.has(p.id));
+  const blockedSet = useMemo(
+    () => new Set(persisted.blockedProfileIds),
+    [persisted.blockedProfileIds],
+  );
 
-    if (!datingProfile || !discoverFilters) {
-      return { deck: unseen, deckEmptyReason: null };
-    }
-
-    const filtered = unseen.filter((p) =>
-      profileMatchesDiscoverFilters(p, discoverFilters, datingProfile),
+  const { deck, deckEmptyReason } = useMemo(() => {
+    const result = buildDiscoverDeck(
+      MOCK_PROFILES,
+      persisted.passedIds,
+      persisted.likedIds,
+      persisted.blockedProfileIds,
+      datingProfile,
+      discoverFilters,
     );
+    return { deck: result.deck, deckEmptyReason: result.emptyReason };
+  }, [
+    persisted.passedIds,
+    persisted.likedIds,
+    persisted.blockedProfileIds,
+    datingProfile,
+    discoverFilters,
+  ]);
 
-    if (filtered.length === 0 && unseen.length > 0) {
-      return { deck: filtered, deckEmptyReason: "filters" };
-    }
-    if (filtered.length === 0) {
-      return { deck: filtered, deckEmptyReason: "caught_up" };
-    }
-    return { deck: filtered, deckEmptyReason: null };
-  }, [persisted.passedIds, persisted.likedIds, datingProfile, discoverFilters]);
+  const visibleMatches = useMemo(
+    () => matches.filter((m) => !blockedSet.has(m.profile.id)),
+    [matches, blockedSet],
+  );
 
   const canLike = useMemo(() => {
     if (hasPaidTier(persisted.tier)) {
@@ -188,6 +205,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (options?.super && persisted.superLikesRemaining <= 0) {
         return null;
       }
+      if (blockedSet.has(profileId)) {
+        return null;
+      }
 
       setLastSwipe({ profileId, action: "like" });
       setPersisted((s) => {
@@ -206,7 +226,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return next;
       });
 
-      if (!MATCH_ON_LIKE_IDS.has(profileId)) {
+      if (!createsMutualMatch(profileId)) {
         return null;
       }
 
@@ -240,12 +260,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLastSwipe({ profileId, action: "like", createdMatchId: matchId });
       return newMatch;
     },
-    [canLike, persisted.superLikesRemaining],
+    [canLike, persisted.superLikesRemaining, blockedSet],
   );
 
   const rewindLastSwipe = useCallback(() => {
     if (!hasPaidTier(persisted.tier) || !lastSwipe) {
-      return;
+      return false;
     }
     const { profileId, action, createdMatchId } = lastSwipe;
     setPersisted((s) => {
@@ -269,47 +289,104 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setMatches((prev) => prev.filter((m) => m.id !== createdMatchId));
     }
     setLastSwipe(null);
+    return true;
   }, [lastSwipe, persisted.tier]);
 
-  const sendMessage = useCallback((matchId: string, body: string) => {
-    const trimmed = body.trim();
-    if (!trimmed) {
-      return;
-    }
-    const msg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      matchId,
-      sender: "me",
-      body: trimmed,
-      sentAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, msg]);
-    setMatches((prev) =>
+  const markRead = useCallback((messageId: string) => {
+    setMessages((prev) =>
       prev.map((m) =>
-        m.id === matchId ? { ...m, lastMessagePreview: trimmed } : m,
+        m.id === messageId ? { ...m, readAt: new Date().toISOString() } : m,
       ),
     );
+  }, []);
 
-    window.setTimeout(
-      () => {
-        const reply = randomAutoReply();
+  const sendMessage = useCallback(
+    (matchId: string, body: string) => {
+      const trimmed = body.trim();
+      if (!trimmed) {
+        return;
+      }
+      const msg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        matchId,
+        sender: "me",
+        body: trimmed,
+        kind: "text",
+        sentAt: new Date().toISOString(),
+        readAt: null,
+      };
+      setMessages((prev) => [...prev, msg]);
+      setMatches((prev) =>
+        prev.map((m) =>
+          m.id === matchId ? { ...m, lastMessagePreview: trimmed } : m,
+        ),
+      );
+
+      setTypingMatchId(matchId);
+      window.setTimeout(() => {
+        markRead(msg.id);
+      }, 1800);
+
+      window.setTimeout(
+        () => {
+          setTypingMatchId(null);
+          const reply = randomAutoReply();
+          const replyMsg: ChatMessage = {
+            id: `msg-${Date.now()}-auto`,
+            matchId,
+            sender: "them",
+            body: reply,
+            kind: "text",
+            sentAt: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, replyMsg]);
+          setMatches((prev) =>
+            prev.map((m) =>
+              m.id === matchId ? { ...m, lastMessagePreview: reply } : m,
+            ),
+          );
+        },
+        1200 + Math.random() * 800,
+      );
+    },
+    [markRead],
+  );
+
+  const sendImageMessage = useCallback(
+    (matchId: string) => {
+      const msg: ChatMessage = {
+        id: `msg-${Date.now()}-img`,
+        matchId,
+        sender: "me",
+        body: "Photo",
+        kind: "image",
+        imageUrl: CHAT_IMAGE_STUB_URL,
+        sentAt: new Date().toISOString(),
+        readAt: null,
+      };
+      setMessages((prev) => [...prev, msg]);
+      setMatches((prev) =>
+        prev.map((m) =>
+          m.id === matchId ? { ...m, lastMessagePreview: "📷 Photo" } : m,
+        ),
+      );
+      setTypingMatchId(matchId);
+      window.setTimeout(() => markRead(msg.id), 2000);
+      window.setTimeout(() => {
+        setTypingMatchId(null);
         const replyMsg: ChatMessage = {
-          id: `msg-${Date.now()}-auto`,
+          id: `msg-${Date.now()}-img-reply`,
           matchId,
           sender: "them",
-          body: reply,
+          body: "Love that shot!",
+          kind: "text",
           sentAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, replyMsg]);
-        setMatches((prev) =>
-          prev.map((m) =>
-            m.id === matchId ? { ...m, lastMessagePreview: reply } : m,
-          ),
-        );
-      },
-      1200 + Math.random() * 800,
-    );
-  }, []);
+      }, 1500);
+    },
+    [markRead],
+  );
 
   const activateBoost = useCallback(() => {
     if (persisted.boostsRemaining <= 0) {
@@ -323,6 +400,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
     return true;
   }, [persisted.boostsRemaining]);
+
+  const blockProfile = useCallback((profileId: string) => {
+    setPersisted((s) => ({
+      ...s,
+      blockedProfileIds: s.blockedProfileIds.includes(profileId)
+        ? s.blockedProfileIds
+        : [...s.blockedProfileIds, profileId],
+    }));
+  }, []);
+
+  const unblockProfile = useCallback((profileId: string) => {
+    setPersisted((s) => ({
+      ...s,
+      blockedProfileIds: s.blockedProfileIds.filter((id) => id !== profileId),
+    }));
+  }, []);
+
+  const unmatch = useCallback((matchId: string) => {
+    setMatches((prev) => prev.filter((m) => m.id !== matchId));
+    setMessages((prev) => prev.filter((m) => m.matchId !== matchId));
+    setPersisted((s) => ({
+      ...s,
+      matchIds: s.matchIds.filter((id) => id !== matchId),
+    }));
+  }, []);
+
+  const reportProfile = useCallback(
+    (_profileId: string, _reason: ReportReason) => {
+      /* mock — no backend */
+    },
+    [],
+  );
 
   const setPremiumTier = useCallback((tier: SubscriptionTier) => {
     setPersisted((s) => ({ ...s, tier }));
@@ -360,6 +469,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMatches(INITIAL_MATCHES);
     setMessages(INITIAL_MESSAGES);
     setLastSwipe(null);
+    setTypingMatchId(null);
   }, []);
 
   const value: AppContextValue = {
@@ -368,20 +478,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     boostsRemaining: persisted.boostsRemaining,
     superLikesRemaining: persisted.superLikesRemaining,
     boostActiveUntil: persisted.boostActiveUntil,
+    streakCount: persisted.streakCount,
     deck,
     deckEmptyReason,
-    matches,
+    matches: visibleMatches,
     messages,
+    blockedProfileIds: persisted.blockedProfileIds,
+    typingMatchId,
     dailyLikeLimit: FREE_DAILY_LIKE_LIMIT,
     likesUsedToday: persisted.likesUsedToday,
     canLike,
+    hasLastSwipe: lastSwipe !== null,
     passProfile,
     likeProfile,
     rewindLastSwipe,
     sendMessage,
+    sendImageMessage,
     activateBoost,
     setPremiumTier,
     applyProductPurchase,
+    blockProfile,
+    unblockProfile,
+    unmatch,
+    reportProfile,
     resetAppState,
   };
 

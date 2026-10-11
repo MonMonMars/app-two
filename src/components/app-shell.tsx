@@ -8,6 +8,7 @@ import { useProfile } from "@/context/profile-provider";
 
 const NAV = [
   { href: "/", label: "Discover", icon: "🔥" },
+  { href: "/likes-you", label: "Likes", icon: "💗" },
   { href: "/matches", label: "Matches", icon: "💬" },
   { href: "/premium", label: "Premium", icon: "✨" },
   { href: "/profile", label: "Profile", icon: "👤" },
@@ -62,7 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {!hideNav ? (
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/5 bg-[#0b0b0f]/95 backdrop-blur-md">
-          <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 py-2 safe-area-pb">
+          <div className="mx-auto flex max-w-lg items-stretch justify-between px-0.5 py-2 safe-area-pb">
             {NAV.map((item) => {
               const active =
                 item.href === "/"
@@ -76,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-[11px] font-medium transition ${
+                  className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl px-0.5 py-2 text-[10px] font-medium transition ${
                     active
                       ? "bg-rose-500/15 text-rose-300"
                       : "text-zinc-500 hover:text-zinc-300"

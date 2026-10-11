@@ -5,15 +5,24 @@ import { clearAllUserData } from "@/lib/profile-storage";
 import { useApp } from "@/context/app-provider";
 import { useAuth } from "@/context/auth-provider";
 import { useProfile } from "@/context/profile-provider";
+import { profileById } from "@/lib/mock-data";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { buttonSecondaryClassName } from "@/components/ui/field-styles";
 
 export function SettingsPanel() {
   const { user, signOut } = useAuth();
   const { settings, updateSettings, resetProfileForUser } = useProfile();
-  const { resetAppState } = useApp();
+  const { resetAppState, blockedProfileIds, unblockProfile } = useApp();
+  const blockedProfiles = useMemo(
+    () =>
+      blockedProfileIds
+        .map((id) => profileById(id))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p)),
+    [blockedProfileIds],
+  );
   const router = useRouter();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -69,6 +78,45 @@ export function SettingsPanel() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+        <h3 className="text-sm font-semibold text-white">Blocked people</h3>
+        <p className="mt-1 text-xs text-zinc-500">
+          Blocked profiles are hidden from Discover and Matches on this device.
+        </p>
+        {blockedProfiles.length === 0 ? (
+          <p className="mt-3 text-sm text-zinc-500">No one blocked.</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {blockedProfiles.map((profile) => (
+              <li
+                key={profile.id}
+                className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-950/50 p-2"
+              >
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <Image
+                    src={profile.photoUrl}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <span className="min-w-0 flex-1 truncate text-sm text-zinc-200">
+                  {profile.name}
+                </span>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-full border border-zinc-600 px-3 py-1 text-xs font-semibold text-zinc-300 hover:border-rose-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400"
+                  onClick={() => unblockProfile(profile.id)}
+                >
+                  Unblock
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">

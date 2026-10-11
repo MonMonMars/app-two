@@ -30,7 +30,10 @@ export function ProfileSettings() {
             Edit dating profile
           </Link>
           <Link href="/settings" className={buttonSecondaryClassName}>
-            Settings & legal
+            Settings, safety & legal
+          </Link>
+          <Link href="/likes-you" className={buttonSecondaryClassName}>
+            Who liked you
           </Link>
         </div>
       </section>

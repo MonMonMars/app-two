@@ -8,6 +8,7 @@ export type Profile = {
   location: string;
   interests: string[];
   photoUrl: string;
+  photoUrls?: string[];
   verified?: boolean;
   gender?: GenderIdentity;
   distanceMiles?: number;
@@ -20,13 +21,21 @@ export type Match = {
   lastMessagePreview?: string;
 };
 
+export type ChatMessageKind = "text" | "image";
+
 export type ChatMessage = {
   id: string;
   matchId: string;
   sender: "me" | "them";
   body: string;
   sentAt: string;
+  kind?: ChatMessageKind;
+  imageUrl?: string;
+  readAt?: string | null;
 };
+
+export type ReportReason =
+  "fake_profile" | "harassment" | "spam" | "underage" | "other";
 
 export type SubscriptionTier = "free" | "premium" | "premium_plus";
 
@@ -80,6 +89,9 @@ export type AppPersistedState = {
   likesUsedToday: number;
   likesDayKey: string;
   boostActiveUntil: string | null;
+  blockedProfileIds: string[];
+  streakCount: number;
+  streakDayKey: string;
 };
 
 export type SubscriptionPlan = {

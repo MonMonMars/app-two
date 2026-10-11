@@ -12,6 +12,11 @@ export const MOCK_PROFILES: Profile[] = [
     verified: true,
     gender: "nonbinary",
     distanceMiles: 2,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-jordan/600/800",
+      "https://picsum.photos/seed/apptwo-jordan-2/600/800",
+      "https://picsum.photos/seed/apptwo-jordan-3/600/800",
+    ],
   },
   {
     id: "p2",
@@ -24,6 +29,10 @@ export const MOCK_PROFILES: Profile[] = [
     verified: true,
     gender: "man",
     distanceMiles: 5,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-sam/600/800",
+      "https://picsum.photos/seed/apptwo-sam-2/600/800",
+    ],
   },
   {
     id: "p3",
@@ -35,6 +44,11 @@ export const MOCK_PROFILES: Profile[] = [
     photoUrl: "https://picsum.photos/seed/apptwo-riley/600/800",
     gender: "woman",
     distanceMiles: 1,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-riley/600/800",
+      "https://picsum.photos/seed/apptwo-riley-2/600/800",
+      "https://picsum.photos/seed/apptwo-riley-3/600/800",
+    ],
   },
   {
     id: "p4",
@@ -47,6 +61,10 @@ export const MOCK_PROFILES: Profile[] = [
     verified: true,
     gender: "man",
     distanceMiles: 8,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-alex/600/800",
+      "https://picsum.photos/seed/apptwo-alex-2/600/800",
+    ],
   },
   {
     id: "p5",
@@ -58,6 +76,10 @@ export const MOCK_PROFILES: Profile[] = [
     photoUrl: "https://picsum.photos/seed/apptwo-casey/600/800",
     gender: "woman",
     distanceMiles: 3,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-casey/600/800",
+      "https://picsum.photos/seed/apptwo-casey-2/600/800",
+    ],
   },
   {
     id: "p6",
@@ -69,6 +91,10 @@ export const MOCK_PROFILES: Profile[] = [
     photoUrl: "https://picsum.photos/seed/apptwo-morgan/600/800",
     gender: "nonbinary",
     distanceMiles: 4,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-morgan/600/800",
+      "https://picsum.photos/seed/apptwo-morgan-2/600/800",
+    ],
   },
   {
     id: "p7",
@@ -80,6 +106,10 @@ export const MOCK_PROFILES: Profile[] = [
     photoUrl: "https://picsum.photos/seed/apptwo-taylor/600/800",
     gender: "woman",
     distanceMiles: 6,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-taylor/600/800",
+      "https://picsum.photos/seed/apptwo-taylor-2/600/800",
+    ],
   },
   {
     id: "p8",
@@ -92,10 +122,20 @@ export const MOCK_PROFILES: Profile[] = [
     verified: true,
     gender: "man",
     distanceMiles: 7,
+    photoUrls: [
+      "https://picsum.photos/seed/apptwo-quinn/600/800",
+      "https://picsum.photos/seed/apptwo-quinn-2/600/800",
+    ],
   },
 ];
 
 export const MATCH_ON_LIKE_IDS = new Set(["p1", "p3", "p5", "p7"]);
+
+/** Demo profiles that already liked you (Likes You screen). */
+export const LIKED_YOU_PROFILE_IDS = ["p4", "p6", "p8", "p2"] as const;
+
+export const CHAT_IMAGE_STUB_URL =
+  "https://picsum.photos/seed/apptwo-chat-image/400/300";
 
 export const AUTO_REPLY_SNIPPETS = [
   "That sounds amazing — tell me more!",

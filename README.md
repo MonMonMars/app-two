@@ -24,18 +24,37 @@ npm run dev
 | `npm run lint`                    | ESLint            |
 | `npm run typecheck`               | TypeScript        |
 | `npm run format` / `format:check` | Prettier          |
+| `npm run test`                    | Vitest unit tests |
 
-## User flows (wave 2)
+## Changelog
 
-| Flow               | Route                    | Persistence                                           |
-| ------------------ | ------------------------ | ----------------------------------------------------- |
-| Sign in            | `/login`                 | `localStorage` auth + API stubs                       |
-| Onboarding         | `/onboarding`            | Dating profile per user id                            |
-| Discover + filters | `/`                      | Filters + swipe state in `localStorage`               |
-| Profile edit       | `/profile/edit`          | Updates Discover self-preview card                    |
-| Settings           | `/settings`              | Notification toggles, legal placeholders, mock delete |
-| Matches / chat     | `/matches`, `/chat/[id]` | Mock threads + auto-replies                           |
-| Premium            | `/premium`               | Stripe checkout stub                                  |
+### Wave 3
+
+- **Discover:** Multi-photo cards (tap sides to swipe photos, dot indicators), lazy-loaded images, fixed card min-height to reduce layout shift
+- **Rewind:** Premium undo last swipe with shake + toast upsell on free tier
+- **Chat:** Typing indicator, mock read receipts, image message stub, report / block / unmatch safety menu
+- **Discover safety:** Report & block from the active card menu
+- **Settings:** Block list with unblock
+- **Likes You** (`/likes-you`): Blurred teaser (free) vs full grid (Premium)
+- **Engagement:** Daily streak banner on Discover (mock, localStorage)
+- **Tests:** Vitest coverage for deck, match, and filter logic
+
+### Wave 2
+
+- Onboarding wizard, Discover filters, profile edit, settings, match toasts, boost countdown, Super Like inventory
+
+## User flows
+
+| Flow               | Route                    | Persistence                                       |
+| ------------------ | ------------------------ | ------------------------------------------------- |
+| Sign in            | `/login`                 | `localStorage` auth + API stubs                   |
+| Onboarding         | `/onboarding`            | Dating profile per user id                        |
+| Discover + filters | `/`                      | Filters + swipe state in `localStorage`           |
+| Profile edit       | `/profile/edit`          | Updates Discover self-preview card                |
+| Settings           | `/settings`              | Notifications, **block list**, legal, mock delete |
+| Likes You          | `/likes-you`             | Free blur vs Premium reveal (demo likes)          |
+| Matches / chat     | `/matches`, `/chat/[id]` | Typing, read receipts, image stub, safety actions |
+| Premium            | `/premium`               | Stripe checkout stub                              |
 
 ### Onboarding collects
 
@@ -88,4 +107,4 @@ src/components/    Swipe deck, filters, onboarding, settings, …
 
 ## CI
 
-`.github/workflows/ci.yml` — lint, typecheck, format, build.
+`.github/workflows/ci.yml` — lint, typecheck, test, format, build.

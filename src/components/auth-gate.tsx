@@ -19,9 +19,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       router.replace("/login");
     }
     if (user && pathname === "/login" && profileHydrated) {
-      router.replace(
-        datingProfile?.onboardingComplete ? "/" : "/onboarding",
-      );
+      router.replace(datingProfile?.onboardingComplete ? "/" : "/onboarding");
     }
   }, [hydrated, profileHydrated, user, datingProfile, pathname, router]);
 

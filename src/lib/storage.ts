@@ -16,12 +16,26 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   likesUsedToday: 0,
   likesDayKey: todayKey(),
   boostActiveUntil: null,
+  blockedProfileIds: [],
+  streakCount: 0,
+  streakDayKey: todayKey(),
 };
 
 export function normalizePersistedState(
   partial: Partial<AppPersistedState>,
 ): AppPersistedState {
-  const merged = { ...DEFAULT_PERSISTED_STATE, ...partial };
+  const merged = {
+    ...DEFAULT_PERSISTED_STATE,
+    ...partial,
+    blockedProfileIds:
+      partial.blockedProfileIds ?? DEFAULT_PERSISTED_STATE.blockedProfileIds,
+    streakCount: partial.streakCount ?? DEFAULT_PERSISTED_STATE.streakCount,
+    streakDayKey: partial.streakDayKey ?? DEFAULT_PERSISTED_STATE.streakDayKey,
+    boostActiveUntil:
+      partial.boostActiveUntil !== undefined
+        ? partial.boostActiveUntil
+        : DEFAULT_PERSISTED_STATE.boostActiveUntil,
+  };
   const key = todayKey();
   if (merged.likesDayKey !== key) {
     return {

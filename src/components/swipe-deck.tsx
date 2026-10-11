@@ -5,6 +5,7 @@ import { useApp } from "@/context/app-provider";
 import { useProfile } from "@/context/profile-provider";
 import { useToast } from "@/context/toast-provider";
 import { ProfileCard } from "@/components/profile-card";
+import { ProfileSafetyMenu } from "@/components/profile-safety-menu";
 import { formatCountdown, useBoostCountdown } from "@/lib/use-boost-countdown";
 import Link from "next/link";
 import { useCallback, useRef, useState, type PointerEvent } from "react";
@@ -24,11 +25,13 @@ export function SwipeDeck() {
     likeProfile,
     activateBoost,
     rewindLastSwipe,
+    hasLastSwipe,
   } = useApp();
   const { settings } = useProfile();
   const { pushToast } = useToast();
   const boostSeconds = useBoostCountdown(boostActiveUntil);
   const [offsetX, setOffsetX] = useState(0);
+  const [rewindShake, setRewindShake] = useState(false);
   const dragStartX = useRef<number | null>(null);
 
   const top = deck[0];
@@ -111,7 +114,39 @@ export function SwipeDeck() {
 
   const paid = tier === "premium" || tier === "premium_plus";
 
+  const onRewind = () => {
+    const ok = rewindLastSwipe();
+    if (ok) {
+      pushToast({
+        variant: "info",
+        title: "Swipe undone",
+        body: "Premium rewind restored your last card.",
+      });
+      return;
+    }
+    setRewindShake(true);
+    window.setTimeout(() => setRewindShake(false), 450);
+    if (!paid) {
+      pushToast({
+        variant: "info",
+        title: "Rewind is Premium",
+        body: "Upgrade to undo your last swipe.",
+        href: "/premium",
+      });
+    }
+  };
+
   if (!top) {
+    if (deckEmptyReason === "blocked") {
+      return (
+        <EmptyState
+          emoji="🚫"
+          title="Blocked profiles hidden"
+          description="Everyone left in the demo is blocked or filtered. Unblock someone in Settings to see them again."
+          action={{ href: "/settings", label: "Manage block list" }}
+        />
+      );
+    }
     if (deckEmptyReason === "filters") {
       return (
         <EmptyState
@@ -158,6 +193,13 @@ export function SwipeDeck() {
       ) : null}
 
       <div className="relative mx-auto min-h-[420px] w-full max-w-md flex-1">
+        <div className="absolute right-2 top-2 z-30 rounded-xl bg-black/40 backdrop-blur-sm">
+          <ProfileSafetyMenu
+            profileId={top.id}
+            profileName={top.name}
+            anchorClassName="absolute right-0 top-10 z-40"
+          />
+        </div>
         {next ? (
           <div className="absolute inset-0 scale-[0.96] opacity-50">
             <ProfileCard profile={next} className="h-full" />
@@ -205,16 +247,21 @@ export function SwipeDeck() {
         >
           <span aria-hidden>✕</span>
         </button>
-        {paid ? (
-          <button
-            type="button"
-            onClick={() => rewindLastSwipe()}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/20 text-lg text-violet-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
-            aria-label="Rewind last swipe"
-          >
-            <span aria-hidden>↩</span>
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={onRewind}
+          disabled={!hasLastSwipe && paid}
+          className={`flex h-12 w-12 items-center justify-center rounded-full text-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 ${
+            paid
+              ? "bg-violet-500/20 text-violet-300"
+              : "bg-zinc-800 text-zinc-400 ring-1 ring-zinc-600"
+          } ${rewindShake ? "animate-rewind-shake" : ""}`}
+          aria-label={
+            paid ? "Rewind last swipe" : "Rewind last swipe (Premium)"
+          }
+        >
+          <span aria-hidden>↩</span>
+        </button>
         <button
           type="button"
           onClick={() => onLike(true)}
