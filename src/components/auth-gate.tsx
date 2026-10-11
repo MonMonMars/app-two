@@ -1,11 +1,13 @@
 "use client";
 
 import { useAuth } from "@/context/auth-provider";
+import { useProfile } from "@/context/profile-provider";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { hydrated, user } = useAuth();
+  const { datingProfile, hydrated: profileHydrated } = useProfile();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -16,10 +18,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
     if (!user && pathname !== "/login") {
       router.replace("/login");
     }
-    if (user && pathname === "/login") {
-      router.replace("/onboarding");
+    if (user && pathname === "/login" && profileHydrated) {
+      router.replace(
+        datingProfile?.onboardingComplete ? "/" : "/onboarding",
+      );
     }
-  }, [hydrated, user, pathname, router]);
+  }, [hydrated, profileHydrated, user, datingProfile, pathname, router]);
 
   if (!hydrated) {
     return (
