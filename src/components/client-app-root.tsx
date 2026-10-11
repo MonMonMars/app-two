@@ -8,8 +8,24 @@ import { AppShell } from "@/components/app-shell";
 import { DebugPanel } from "@/components/debug-panel";
 import { OfflineBanner } from "@/components/offline-banner";
 import { PushSoftPrompt } from "@/components/push-soft-prompt";
+import { MatchCelebrationModal } from "@/components/match-celebration-modal";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { AppErrorBoundary } from "@/components/app-error-boundary";
+import { useApp } from "@/context/app-provider";
 import { Suspense } from "react";
+
+function MatchCelebrationLayer() {
+  const { celebrationMatch, clearCelebrationMatch } = useApp();
+  if (!celebrationMatch) {
+    return null;
+  }
+  return (
+    <MatchCelebrationModal
+      match={celebrationMatch}
+      onKeepSwiping={clearCelebrationMatch}
+    />
+  );
+}
 
 export function ClientAppRoot({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +33,10 @@ export function ClientAppRoot({ children }: { children: React.ReactNode }) {
       <OnboardingGate>
         <AppProvider>
           <ToastProvider>
-            <AppShell>{children}</AppShell>
+            <AppErrorBoundary>
+              <AppShell>{children}</AppShell>
+            </AppErrorBoundary>
+            <MatchCelebrationLayer />
             <OfflineBanner />
             <PushSoftPrompt />
             <ServiceWorkerRegister />

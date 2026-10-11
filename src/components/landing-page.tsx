@@ -75,6 +75,17 @@ export function LandingPage() {
         <p className="mt-10 text-center text-xs text-zinc-600">
           {copy.footerNote}
         </p>
+        <p className="mt-3 flex flex-wrap justify-center gap-3 text-xs text-zinc-600">
+          <Link href="/legal/privacy" className="text-rose-400/80 underline">
+            Privacy
+          </Link>
+          <Link href="/legal/terms" className="text-rose-400/80 underline">
+            Terms
+          </Link>
+          <Link href="/legal/community" className="text-rose-400/80 underline">
+            Community
+          </Link>
+        </p>
         <p className="mt-4 text-center text-xs text-zinc-600">
           <Link href="/u/p1" className="text-rose-400/80 underline">
             Sample profile link

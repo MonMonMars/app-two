@@ -17,6 +17,11 @@ import {
   loadPersistedState,
   savePersistedState,
 } from "@/lib/storage";
+import {
+  readWatermarkNow,
+  sortMatchesByRecentActivity,
+  totalUnreadCount,
+} from "@/lib/match-inbox";
 import { hasPaidTier } from "@/lib/premium-gating";
 import {
   activateSubscription,
@@ -97,6 +102,12 @@ type AppContextValue = {
   dismissPushSoftPrompt: () => void;
   cancelSubscription: () => void;
   reactivateSubscription: () => void;
+  inboxMatches: Match[];
+  unreadMessageCount: number;
+  celebrationMatch: Match | null;
+  clearCelebrationMatch: () => void;
+  markMatchAsRead: (matchId: string) => void;
+  matchLastReadAt: Record<string, string>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -141,6 +152,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     action: "like" | "pass";
     createdMatchId?: string;
   } | null>(null);
+  const [celebrationMatch, setCelebrationMatch] = useState<Match | null>(null);
 
   useEffect(() => {
     const loaded = touchDailyStreak(clearExpiredBoost(loadPersistedState()));
@@ -200,6 +212,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const visibleMatches = useMemo(
     () => filterMatchesAfterBlock(matches, persisted.blockedProfileIds),
     [matches, persisted.blockedProfileIds],
+  );
+
+  const inboxMatches = useMemo(
+    () => sortMatchesByRecentActivity(visibleMatches, messages),
+    [visibleMatches, messages],
+  );
+
+  const unreadMessageCount = useMemo(
+    () =>
+      totalUnreadCount(
+        visibleMatches,
+        messages,
+        persisted.matchLastReadAt,
+      ),
+    [visibleMatches, messages, persisted.matchLastReadAt],
   );
 
   const canLike = useMemo(() => {
@@ -282,6 +309,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }));
 
       setLastSwipe({ profileId, action: "like", createdMatchId: matchId });
+      setCelebrationMatch(newMatch);
       return newMatch;
     },
     [canLike, persisted.superLikesRemaining, blockedSet],
@@ -508,12 +536,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPersisted((s) => reactivateSubscriptionMock(s));
   }, []);
 
+  const clearCelebrationMatch = useCallback(() => {
+    setCelebrationMatch(null);
+  }, []);
+
+  const markMatchAsRead = useCallback((matchId: string) => {
+    const watermark = readWatermarkNow();
+    setPersisted((s) => ({
+      ...s,
+      matchLastReadAt: { ...s.matchLastReadAt, [matchId]: watermark },
+    }));
+  }, []);
+
   const resetAppState = useCallback(() => {
     setPersisted(DEFAULT_PERSISTED_STATE);
     setMatches(INITIAL_MATCHES);
     setMessages(INITIAL_MESSAGES);
     setLastSwipe(null);
     setTypingMatchId(null);
+    setCelebrationMatch(null);
   }, []);
 
   const debugResetLocalData = useCallback(() => {
@@ -555,6 +596,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deck,
     deckEmptyReason,
     matches: visibleMatches,
+    inboxMatches,
+    unreadMessageCount,
+    celebrationMatch,
+    clearCelebrationMatch,
+    markMatchAsRead,
+    matchLastReadAt: persisted.matchLastReadAt,
     messages,
     blockedProfileIds: persisted.blockedProfileIds,
     typingMatchId,

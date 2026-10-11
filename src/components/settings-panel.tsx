@@ -124,14 +124,12 @@ export function SettingsPanel() {
         <ul className="mt-3 space-y-2">
           {Object.entries(LEGAL_LINKS).map(([key, url]) => (
             <li key={key}>
-              <a
+              <Link
                 href={url}
                 className="text-rose-400 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400"
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

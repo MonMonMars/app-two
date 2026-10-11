@@ -59,9 +59,12 @@ describe("buildDiscoverDeck", () => {
   });
 
   it("returns blocked empty reason when only blocked profiles remain", () => {
+    const passed = MOCK_PROFILES.map((p) => p.id).filter(
+      (id) => !["p1", "p2", "p3"].includes(id),
+    );
     const { emptyReason } = buildDiscoverDeck(
       MOCK_PROFILES,
-      ["p4", "p5", "p6", "p7", "p8"],
+      passed,
       [],
       ["p1", "p2", "p3"],
       demoUser,

@@ -23,6 +23,7 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   subscriptionRenewalAt: null,
   discoverCoachDismissed: false,
   pushSoftPrompt: "idle",
+  matchLastReadAt: { "m-seed-1": new Date(Date.now() - 7200000).toISOString() },
 };
 
 export function normalizePersistedState(
@@ -46,6 +47,8 @@ export function normalizePersistedState(
       DEFAULT_PERSISTED_STATE.discoverCoachDismissed,
     pushSoftPrompt:
       partial.pushSoftPrompt ?? DEFAULT_PERSISTED_STATE.pushSoftPrompt,
+    matchLastReadAt:
+      partial.matchLastReadAt ?? DEFAULT_PERSISTED_STATE.matchLastReadAt,
     boostActiveUntil:
       partial.boostActiveUntil !== undefined
         ? partial.boostActiveUntil

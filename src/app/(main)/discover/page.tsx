@@ -1,3 +1,4 @@
+import { DailyLikeCounter } from "@/components/daily-like-counter";
 import { DiscoverCoachMarks } from "@/components/discover-coach-marks";
 import { DiscoverFiltersPanel } from "@/components/discover-filters-panel";
 import { DiscoverScreen } from "@/components/discover-screen";
@@ -8,6 +9,7 @@ export default function DiscoverPage() {
   return (
     <div className="flex flex-1 flex-col">
       <StreakBanner />
+      <DailyLikeCounter />
       <DiscoverCoachMarks />
       <SelfPreviewCard />
       <DiscoverFiltersPanel />

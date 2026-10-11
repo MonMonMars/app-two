@@ -21,6 +21,7 @@ export const INTEREST_OPTIONS = [
   "Coffee",
   "Gaming",
   "Fitness",
+  "Podcasts",
 ] as const;
 
 export const GENDER_OPTIONS: { value: GenderIdentity; label: string }[] = [
@@ -46,10 +47,9 @@ export const MOCK_PHOTO_PRESETS = [
 ] as const;
 
 export const LEGAL_LINKS = {
-  terms: "https://example.com/app-two/terms",
-  privacy: "https://example.com/app-two/privacy",
-  safety: "https://example.com/app-two/safety",
-  cookies: "https://example.com/app-two/cookies",
+  terms: "/legal/terms",
+  privacy: "/legal/privacy",
+  community: "/legal/community",
 } as const;
 
 export const BOOST_DURATION_MS = 30 * 60 * 1000;

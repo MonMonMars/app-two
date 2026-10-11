@@ -100,6 +100,7 @@ export type AppPersistedState = {
   subscriptionRenewalAt: string | null;
   discoverCoachDismissed: boolean;
   pushSoftPrompt: PushSoftPromptState;
+  matchLastReadAt: Record<string, string>;
 };
 
 export type SubscriptionPlan = {

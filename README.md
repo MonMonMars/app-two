@@ -28,6 +28,19 @@ npm run dev
 
 ## Changelog
 
+### Wave 6
+
+- **16 demo profiles** — varied bios, interests, and distances (filters feel alive)
+- **Match inbox** — sorted by recent message activity; **unread badges** on list + Matches tab
+- **Match celebration** — full-screen modal (Send message / Keep swiping)
+- **Daily like cap UX** — remaining likes counter on Discover for Free; upsell at cap
+- **Legal stubs** — `/legal/privacy`, `/legal/terms`, `/legal/community` linked from landing & Settings
+- **Error boundary** — client retry + `(main)/error.tsx` fallback
+- **`/dev/kitchen?debug=1`** — component/state gallery for visual QA (no Storybook)
+- **44+ Vitest tests** — inbox sorting/unread, daily cap, celebration triggers
+
+**Secrets:** Do not copy API keys, env files, or private credentials from sibling or internal lineages into this public repo. App Two uses placeholders in `.env.example` only.
+
 ### Wave 5
 
 - **`/premium/manage`** — current plan, mock renewal date, cancel / reactivate stubs, consumable inventory summary

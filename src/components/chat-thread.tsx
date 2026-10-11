@@ -8,7 +8,7 @@ import { formatRelativeTime } from "@/lib/format";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 type ChatThreadProps = {
   matchId: string;
@@ -22,6 +22,7 @@ export function ChatThread({ matchId }: ChatThreadProps) {
     sendImageMessage,
     typingMatchId,
     hydrated,
+    markMatchAsRead,
   } = useApp();
   const router = useRouter();
   const [draft, setDraft] = useState("");
@@ -36,6 +37,12 @@ export function ChatThread({ matchId }: ChatThreadProps) {
         ),
     [messages, matchId],
   );
+
+  useEffect(() => {
+    if (match) {
+      markMatchAsRead(matchId);
+    }
+  }, [match, matchId, markMatchAsRead]);
 
   if (!hydrated) {
     return <PageLoading message={t().loading.chat} />;

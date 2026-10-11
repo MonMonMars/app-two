@@ -28,7 +28,7 @@ function tierLabel(tier: string): string {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { tier, matches } = useApp();
+  const { tier, unreadMessageCount } = useApp();
   const { user } = useAuth();
   const { datingProfile } = useProfile();
   const hideNav =
@@ -92,8 +92,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   ? pathname === "/discover"
                   : pathname.startsWith(item.href);
               const badge =
-                item.href === "/matches" && matches.length > 0
-                  ? matches.length
+                item.href === "/matches" && unreadMessageCount > 0
+                  ? unreadMessageCount
                   : null;
               return (
                 <Link
