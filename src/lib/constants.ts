@@ -53,3 +53,8 @@ export const LEGAL_LINKS = {
 } as const;
 
 export const BOOST_DURATION_MS = 30 * 60 * 1000;
+
+/** Free-tier soft paywall interstitial after this many pass+like swipes. */
+export const SOFT_PAYWALL_SWIPE_THRESHOLD = 12;
+
+export const MESSAGE_REACTION_EMOJIS = ["❤️", "😂", "🔥"] as const;

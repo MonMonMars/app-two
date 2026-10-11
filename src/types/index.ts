@@ -32,6 +32,7 @@ export type ChatMessage = {
   kind?: ChatMessageKind;
   imageUrl?: string;
   readAt?: string | null;
+  reaction?: string | null;
 };
 
 export type ReportReason =
@@ -101,6 +102,8 @@ export type AppPersistedState = {
   discoverCoachDismissed: boolean;
   pushSoftPrompt: PushSoftPromptState;
   matchLastReadAt: Record<string, string>;
+  referralShareCount: number;
+  softPaywallDismissedDayKey: string | null;
 };
 
 export type SubscriptionPlan = {

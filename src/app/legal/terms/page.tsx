@@ -5,8 +5,8 @@ export default function TermsPage() {
     <LegalDocument title="Terms of Service (placeholder)">
       <p>
         By using the App Two demo you agree this is mock software with no
-        warranty. Matches, messages, and purchases are simulated unless you
-        wire real Stripe test mode yourself.
+        warranty. Matches, messages, and purchases are simulated unless you wire
+        real Stripe test mode yourself.
       </p>
       <p>
         You must be 18+ in a real product; this demo does not verify age beyond

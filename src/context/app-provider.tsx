@@ -1,7 +1,13 @@
 "use client";
 
 import { useProfile } from "@/context/profile-provider";
-import { BOOST_DURATION_MS } from "@/lib/constants";
+import { track } from "@/lib/analytics";
+import {
+  BOOST_DURATION_MS,
+  SOFT_PAYWALL_SWIPE_THRESHOLD,
+} from "@/lib/constants";
+import { applyMessageReaction } from "@/lib/message-reactions";
+import { shouldShowSoftPaywall } from "@/lib/paywall-interstitial";
 import { buildDiscoverDeck } from "@/lib/deck-logic";
 import { createsMutualMatch } from "@/lib/match-logic";
 import {
@@ -108,6 +114,12 @@ type AppContextValue = {
   clearCelebrationMatch: () => void;
   markMatchAsRead: (matchId: string) => void;
   matchLastReadAt: Record<string, string>;
+  referralSignupCount: number;
+  recordReferralShare: () => void;
+  dismissSoftPaywall: () => void;
+  showSoftPaywallInterstitial: boolean;
+  totalSwipeCount: number;
+  addMessageReaction: (messageId: string, emoji: string) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -220,12 +232,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const unreadMessageCount = useMemo(
-    () =>
-      totalUnreadCount(
-        visibleMatches,
-        messages,
-        persisted.matchLastReadAt,
-      ),
+    () => totalUnreadCount(visibleMatches, messages, persisted.matchLastReadAt),
     [visibleMatches, messages, persisted.matchLastReadAt],
   );
 
@@ -237,6 +244,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [persisted.tier, persisted.likesUsedToday]);
 
   const passProfile = useCallback((profileId: string) => {
+    track("swipe_pass", { profileId });
     setLastSwipe({ profileId, action: "pass" });
     setPersisted((s) => ({
       ...s,
@@ -258,6 +266,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
+      track("swipe_like", { profileId, super: Boolean(options?.super) });
       setLastSwipe({ profileId, action: "like" });
       setPersisted((s) => {
         let next = {
@@ -309,6 +318,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }));
 
       setLastSwipe({ profileId, action: "like", createdMatchId: matchId });
+      track("match", { profileId, matchId });
       setCelebrationMatch(newMatch);
       return newMatch;
     },
@@ -488,6 +498,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyProductPurchase = useCallback((product: MonetizationProduct) => {
+    track("purchase_mock", { product });
     setPersisted((s) => {
       switch (product) {
         case "premium_monthly":
@@ -534,6 +545,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const reactivateSubscription = useCallback(() => {
     setPersisted((s) => reactivateSubscriptionMock(s));
+  }, []);
+
+  const totalSwipeCount = useMemo(
+    () => persisted.passedIds.length + persisted.likedIds.length,
+    [persisted.passedIds.length, persisted.likedIds.length],
+  );
+
+  const showSoftPaywallInterstitial = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return shouldShowSoftPaywall(
+      persisted.tier,
+      persisted.passedIds,
+      persisted.likedIds,
+      SOFT_PAYWALL_SWIPE_THRESHOLD,
+      persisted.softPaywallDismissedDayKey,
+      today,
+    );
+  }, [
+    persisted.tier,
+    persisted.passedIds,
+    persisted.likedIds,
+    persisted.softPaywallDismissedDayKey,
+  ]);
+
+  const dismissSoftPaywall = useCallback(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    setPersisted((s) => ({ ...s, softPaywallDismissedDayKey: today }));
+  }, []);
+
+  const recordReferralShare = useCallback(() => {
+    setPersisted((s) => ({
+      ...s,
+      referralShareCount: s.referralShareCount + 1,
+    }));
+  }, []);
+
+  const addMessageReaction = useCallback((messageId: string, emoji: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId
+          ? { ...m, reaction: applyMessageReaction(m.reaction, emoji) }
+          : m,
+      ),
+    );
   }, []);
 
   const clearCelebrationMatch = useCallback(() => {
@@ -602,6 +657,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clearCelebrationMatch,
     markMatchAsRead,
     matchLastReadAt: persisted.matchLastReadAt,
+    referralSignupCount: persisted.referralShareCount,
+    recordReferralShare,
+    dismissSoftPaywall,
+    showSoftPaywallInterstitial,
+    totalSwipeCount,
+    addMessageReaction,
     messages,
     blockedProfileIds: persisted.blockedProfileIds,
     typingMatchId,

@@ -24,6 +24,8 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   discoverCoachDismissed: false,
   pushSoftPrompt: "idle",
   matchLastReadAt: { "m-seed-1": new Date(Date.now() - 7200000).toISOString() },
+  referralShareCount: 0,
+  softPaywallDismissedDayKey: null,
 };
 
 export function normalizePersistedState(
@@ -49,6 +51,12 @@ export function normalizePersistedState(
       partial.pushSoftPrompt ?? DEFAULT_PERSISTED_STATE.pushSoftPrompt,
     matchLastReadAt:
       partial.matchLastReadAt ?? DEFAULT_PERSISTED_STATE.matchLastReadAt,
+    referralShareCount:
+      partial.referralShareCount ?? DEFAULT_PERSISTED_STATE.referralShareCount,
+    softPaywallDismissedDayKey:
+      partial.softPaywallDismissedDayKey !== undefined
+        ? partial.softPaywallDismissedDayKey
+        : DEFAULT_PERSISTED_STATE.softPaywallDismissedDayKey,
     boostActiveUntil:
       partial.boostActiveUntil !== undefined
         ? partial.boostActiveUntil

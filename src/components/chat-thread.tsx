@@ -4,6 +4,7 @@ import { ChatSafetyMenu } from "@/components/chat-safety-menu";
 import { PageError, PageLoading } from "@/components/page-states";
 import { useApp } from "@/context/app-provider";
 import { t } from "@/i18n";
+import { MESSAGE_REACTION_EMOJIS } from "@/lib/constants";
 import { formatRelativeTime } from "@/lib/format";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,6 +24,7 @@ export function ChatThread({ matchId }: ChatThreadProps) {
     typingMatchId,
     hydrated,
     markMatchAsRead,
+    addMessageReaction,
   } = useApp();
   const router = useRouter();
   const [draft, setDraft] = useState("");
@@ -116,6 +118,30 @@ export function ChatThread({ matchId }: ChatThreadProps) {
                 ) : (
                   <p className="px-3 py-2">{msg.body}</p>
                 )}
+              </div>
+              <div
+                className={`flex items-center gap-1 ${msg.sender === "me" ? "ml-auto justify-end" : ""}`}
+              >
+                {MESSAGE_REACTION_EMOJIS.map((emoji) => (
+                  <button
+                    key={`${msg.id}-${emoji}`}
+                    type="button"
+                    className={`rounded-full px-1.5 py-0.5 text-xs ${
+                      msg.reaction === emoji
+                        ? "bg-rose-500/30 ring-1 ring-rose-400"
+                        : "bg-zinc-800/80 text-zinc-400 hover:text-zinc-200"
+                    }`}
+                    aria-label={`React with ${emoji}`}
+                    onClick={() => addMessageReaction(msg.id, emoji)}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+                {msg.reaction ? (
+                  <span className="text-sm" aria-label="Active reaction">
+                    {msg.reaction}
+                  </span>
+                ) : null}
               </div>
               <span
                 className={`text-[10px] text-zinc-600 ${

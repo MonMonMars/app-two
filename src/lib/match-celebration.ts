@@ -1,6 +1,8 @@
 import type { Match } from "@/types";
 
-export function shouldShowMatchCelebration(match: Match | null): match is Match {
+export function shouldShowMatchCelebration(
+  match: Match | null,
+): match is Match {
   return match !== null;
 }
 

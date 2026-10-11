@@ -120,6 +120,19 @@ export function SettingsPanel() {
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">
+        <h3 className="font-semibold text-white">Invite friends (mock)</h3>
+        <p className="mt-1 text-xs text-zinc-500">
+          Copy a referral link and track mock shares locally.
+        </p>
+        <Link
+          href="/invite"
+          className={`mt-3 inline-block ${buttonSecondaryClassName}`}
+        >
+          Open invite page
+        </Link>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">
         <h3 className="font-semibold text-white">Legal (placeholders)</h3>
         <ul className="mt-3 space-y-2">
           {Object.entries(LEGAL_LINKS).map(([key, url]) => (

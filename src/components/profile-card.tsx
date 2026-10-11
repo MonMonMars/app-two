@@ -1,6 +1,8 @@
 "use client";
 
+import { VerificationBadge } from "@/components/verification-badge";
 import { getProfilePhotos } from "@/lib/profile-photos";
+import { showPhotoVerifiedOnProfile } from "@/lib/verification-badge";
 import type { Profile } from "@/types";
 import Image from "next/image";
 import {
@@ -117,13 +119,8 @@ export function ProfileCard({
             <h2 className="text-2xl font-bold">
               {profile.name}, {profile.age}
             </h2>
-            {profile.verified ? (
-              <span
-                className="rounded-full bg-sky-500/90 px-2 py-0.5 text-[10px] font-bold uppercase"
-                title="Verified (mock)"
-              >
-                ✓
-              </span>
+            {showPhotoVerifiedOnProfile(profile) ? (
+              <VerificationBadge compact />
             ) : null}
           </div>
           <p className="mt-1 text-sm text-zinc-300">{profile.location}</p>

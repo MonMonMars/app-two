@@ -2,16 +2,16 @@
 
 import { EmptyState } from "@/components/empty-state";
 import { PageLoading } from "@/components/page-states";
+import { inputClassName } from "@/components/ui/field-styles";
 import { useApp } from "@/context/app-provider";
 import { t } from "@/i18n";
 import { formatRelativeTime } from "@/lib/format";
-import {
-  countUnreadForMatch,
-  inboxActivityTimestamp,
-} from "@/lib/match-inbox";
+import { countUnreadForMatch, inboxActivityTimestamp } from "@/lib/match-inbox";
+import { filterMatchesByName } from "@/lib/match-search";
 import type { ChatMessage, Match } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 type MatchRowProps = {
   match: Match;
@@ -68,6 +68,12 @@ function MatchRow({ match, messages, lastReadAt }: MatchRowProps) {
 
 export function MatchList() {
   const { inboxMatches, messages, matchLastReadAt, hydrated } = useApp();
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(
+    () => filterMatchesByName(inboxMatches, query),
+    [inboxMatches, query],
+  );
 
   if (!hydrated) {
     return <PageLoading message={t().loading.matches} />;
@@ -85,15 +91,34 @@ export function MatchList() {
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {inboxMatches.map((match) => (
-        <MatchRow
-          key={match.id}
-          match={match}
-          messages={messages}
-          lastReadAt={matchLastReadAt[match.id]}
-        />
-      ))}
-    </ul>
+    <div className="flex flex-col gap-3">
+      <label className="sr-only" htmlFor="match-search">
+        Search matches by name
+      </label>
+      <input
+        id="match-search"
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search matches…"
+        className={inputClassName}
+      />
+      {filtered.length === 0 ? (
+        <p className="text-center text-sm text-zinc-500">
+          No matches named &ldquo;{query}&rdquo;.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {filtered.map((match) => (
+            <MatchRow
+              key={match.id}
+              match={match}
+              messages={messages}
+              lastReadAt={matchLastReadAt[match.id]}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

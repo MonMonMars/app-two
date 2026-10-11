@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import {
   displayNameFromEmail,
   loadAuthUser,
@@ -100,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: new Date().toISOString(),
     };
     setUser(nextUser);
+    track("signup", { userId: nextUser.id });
     sessionStorage.removeItem(PENDING_MAGIC_EMAIL_KEY);
     setPendingMagicEmail(null);
     return { ok: true };

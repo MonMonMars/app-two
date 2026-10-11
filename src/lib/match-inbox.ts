@@ -31,8 +31,7 @@ export function sortMatchesByRecentActivity(
 ): Match[] {
   return [...matches].sort(
     (a, b) =>
-      inboxActivityTimestamp(b, messages) -
-      inboxActivityTimestamp(a, messages),
+      inboxActivityTimestamp(b, messages) - inboxActivityTimestamp(a, messages),
   );
 }
 
@@ -57,8 +56,7 @@ export function totalUnreadCount(
 ): number {
   return matches.reduce(
     (sum, m) =>
-      sum +
-      countUnreadForMatch(m.id, messages, matchLastReadAt[m.id]),
+      sum + countUnreadForMatch(m.id, messages, matchLastReadAt[m.id]),
     0,
   );
 }

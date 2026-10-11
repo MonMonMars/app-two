@@ -28,6 +28,19 @@ npm run dev
 
 ## Changelog
 
+### Wave 7
+
+- **`/invite`** — copy-link referral stub + mock share count; Settings entry
+- **Photo verified** badge on Discover cards + self preview (mock)
+- **Match search** by name in inbox
+- **Chat reactions** (❤️ 😂 🔥) on bubbles
+- **Soft paywall interstitial** after `SOFT_PAYWALL_SWIPE_THRESHOLD` swipes (Free)
+- **`track()` analytics stub** — console in dev (`signup`, swipe, `match`, `paywall_view`, `purchase_mock`)
+- **CONTRIBUTING.md**, **CODE_OF_CONDUCT.md** placeholder, **MIT LICENSE**
+- **50+ Vitest tests**; README mock vs production table refresh
+
+Do **not** copy secrets, production env files, or private credentials from sibling lineages into this repo.
+
 ### Wave 6
 
 - **16 demo profiles** — varied bios, interests, and distances (filters feel alive)
@@ -121,17 +134,21 @@ Distance radius slider (miles), age min/max, optional “must share interest” 
 
 Match **toasts** appear when notification toggle for matches is on (Settings).
 
-## Mock vs real
+## Mock vs production
 
-| Feature             | Status                                                   |
-| ------------------- | -------------------------------------------------------- |
-| Profiles in deck    | Mock static list + picsum photos                         |
-| Location / distance | Mock miles on each card                                  |
-| Match algorithm     | Demo: likes on Jordan, Riley, Casey, Taylor always match |
-| Chat                | Local + simulated replies                                |
-| Auth email          | Mock magic link (no SMTP)                                |
-| Stripe              | Stub checkout unless test keys configured                |
-| Delete account      | Clears local data only                                   |
+| Area            | In this repo (mock / demo)        | Production would need                                   |
+| --------------- | --------------------------------- | ------------------------------------------------------- |
+| Profiles & deck | 16 static profiles, picsum photos | Real users, moderation, CDN                             |
+| Location        | `distanceMiles` on cards          | GPS / geohash, privacy                                  |
+| Matching        | Deterministic IDs (`p1`, `p3`, …) | Mutual-like graph, ML ranking                           |
+| Chat            | localStorage + auto-replies       | WebSocket, push, media scan                             |
+| Auth            | Mock magic link, no email         | SMTP/OAuth, sessions, fraud                             |
+| Payments        | Mock checkout + local tier        | Stripe webhooks, entitlements                           |
+| Referrals       | Copy link + local counter         | Attribution, rewards, fraud                             |
+| Analytics       | `console.info` in dev             | Consent, pipeline, PII rules                            |
+| Push            | UI stub only                      | FCM/APNs, permissions                                   |
+| Legal           | Placeholder pages                 | Counsel-reviewed policies                               |
+| Secrets         | `.env.example` placeholders only  | Vault / host env — **never from private sibling repos** |
 
 ## Environment
 

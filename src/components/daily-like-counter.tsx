@@ -1,7 +1,10 @@
 "use client";
 
 import { useApp } from "@/context/app-provider";
-import { dailyLikeCounterLabel, isDailyLikeCapReached } from "@/lib/daily-like-cap";
+import {
+  dailyLikeCounterLabel,
+  isDailyLikeCapReached,
+} from "@/lib/daily-like-cap";
 import Link from "next/link";
 
 export function DailyLikeCounter() {

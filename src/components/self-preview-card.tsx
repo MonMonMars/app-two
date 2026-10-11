@@ -1,6 +1,8 @@
 "use client";
 
+import { VerificationBadge } from "@/components/verification-badge";
 import { useProfile } from "@/context/profile-provider";
+import { showPhotoVerifiedOnSelf } from "@/lib/verification-badge";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -28,8 +30,13 @@ export function SelfPreviewCard() {
         <p className="text-xs font-semibold uppercase tracking-wider text-rose-300">
           Your card preview
         </p>
-        <p className="truncate font-semibold text-white">
-          {datingProfile.name}, {datingProfile.age}
+        <p className="flex flex-wrap items-center gap-2 truncate font-semibold text-white">
+          <span className="truncate">
+            {datingProfile.name}, {datingProfile.age}
+          </span>
+          {showPhotoVerifiedOnSelf(datingProfile) ? (
+            <VerificationBadge compact />
+          ) : null}
         </p>
         <p className="truncate text-xs text-zinc-400">
           {datingProfile.bio || "Add a bio in profile edit"}
