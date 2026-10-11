@@ -6,6 +6,8 @@ import { t } from "@/i18n";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { LandingFaq } from "@/components/landing-faq";
+import { WaitlistForm } from "@/components/waitlist-form";
 import { buttonPrimaryClassName } from "@/components/ui/field-styles";
 
 export function LandingPage() {
@@ -36,7 +38,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-zinc-100">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="mx-auto flex max-w-lg flex-col px-4 pb-16 pt-10">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-400">
           {t().brand}
@@ -64,13 +66,21 @@ export function LandingPage() {
           {copy.features.map((feature) => (
             <li
               key={feature.title}
-              className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+              className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)]/60 p-4"
             >
-              <h2 className="font-semibold text-white">{feature.title}</h2>
-              <p className="mt-1 text-sm text-zinc-400">{feature.body}</p>
+              <h2 className="font-semibold text-[var(--foreground)]">
+                {feature.title}
+              </h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">{feature.body}</p>
             </li>
           ))}
         </ul>
+
+        <div className="mt-10">
+          <WaitlistForm />
+        </div>
+
+        <LandingFaq />
 
         <p className="mt-10 text-center text-xs text-zinc-600">
           {copy.footerNote}

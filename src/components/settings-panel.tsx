@@ -10,6 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { downloadUserDataJson } from "@/lib/export-user-data";
+import type { ThemePreference } from "@/types";
 import { buttonSecondaryClassName } from "@/components/ui/field-styles";
 
 export function SettingsPanel() {
@@ -39,6 +41,63 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4">
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+        <h3 className="text-sm font-semibold text-white">Appearance</h3>
+        <p className="mt-1 text-xs text-zinc-500">
+          Theme uses CSS variables on the document root (persisted locally).
+        </p>
+        <div className="mt-3 flex gap-2">
+          {(["dark", "light"] as const satisfies ThemePreference[]).map(
+            (theme) => (
+              <button
+                key={theme}
+                type="button"
+                className={`flex-1 rounded-full border py-2 text-sm font-semibold capitalize focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400 ${
+                  settings.theme === theme
+                    ? "border-rose-500 bg-rose-500/15 text-rose-200"
+                    : "border-zinc-600 text-zinc-300"
+                }`}
+                aria-pressed={settings.theme === theme}
+                onClick={() => updateSettings({ theme })}
+              >
+                {theme}
+              </button>
+            ),
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+        <h3 className="text-sm font-semibold text-white">
+          Match sounds (mock)
+        </h3>
+        <p className="mt-1 text-xs text-zinc-500">
+          Optional Web Audio chime when the match celebration modal opens.
+        </p>
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-zinc-300">Sound effects</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={settings.soundEffectsEnabled}
+            className={`relative h-7 w-12 rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400 ${
+              settings.soundEffectsEnabled ? "bg-rose-500" : "bg-zinc-700"
+            }`}
+            onClick={() =>
+              updateSettings({
+                soundEffectsEnabled: !settings.soundEffectsEnabled,
+              })
+            }
+          >
+            <span
+              className={`absolute top-0.5 size-6 rounded-full bg-white transition ${
+                settings.soundEffectsEnabled ? "left-5" : "left-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
         <h3 className="text-sm font-semibold text-white">
           Notifications (mock)
@@ -117,6 +176,26 @@ export function SettingsPanel() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">
+        <h3 className="font-semibold text-white">Export my data (mock)</h3>
+        <p className="mt-1 text-xs text-zinc-500">
+          Download JSON of profile, filters, settings, and app state from this
+          browser.
+        </p>
+        <button
+          type="button"
+          className={`mt-3 ${buttonSecondaryClassName}`}
+          disabled={!user}
+          onClick={() => {
+            if (user) {
+              downloadUserDataJson(user.id);
+            }
+          }}
+        >
+          Download JSON export
+        </button>
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">

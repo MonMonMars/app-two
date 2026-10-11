@@ -17,4 +17,8 @@ describe("referral stub", () => {
     expect(mockReferralCountFromStorage(3)).toBe(3);
     expect(mockReferralCountFromStorage(-1)).toBe(0);
   });
+
+  it("uses stable demo referral code", () => {
+    expect(DEMO_REFERRAL_CODE).toBe("APP-TWO-DEMO");
+  });
 });

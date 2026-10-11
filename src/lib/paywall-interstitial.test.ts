@@ -39,4 +39,10 @@ describe("soft paywall interstitial", () => {
       ),
     ).toBe(false);
   });
+
+  it("hides below swipe threshold", () => {
+    expect(
+      shouldShowSoftPaywall("free", ["a", "b"], ["c"], 12, null, "2026-01-01"),
+    ).toBe(false);
+  });
 });

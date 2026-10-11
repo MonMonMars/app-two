@@ -49,9 +49,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      data-theme="dark"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#0b0b0f] font-sans text-zinc-100">
+      <body className="min-h-full bg-[var(--background)] font-sans text-[var(--foreground)]">
         <RootProviders>{children}</RootProviders>
       </body>
     </html>

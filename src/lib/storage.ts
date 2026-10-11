@@ -26,6 +26,7 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   matchLastReadAt: { "m-seed-1": new Date(Date.now() - 7200000).toISOString() },
   referralShareCount: 0,
   softPaywallDismissedDayKey: null,
+  rateAppPromptDismissed: false,
 };
 
 export function normalizePersistedState(
@@ -57,6 +58,9 @@ export function normalizePersistedState(
       partial.softPaywallDismissedDayKey !== undefined
         ? partial.softPaywallDismissedDayKey
         : DEFAULT_PERSISTED_STATE.softPaywallDismissedDayKey,
+    rateAppPromptDismissed:
+      partial.rateAppPromptDismissed ??
+      DEFAULT_PERSISTED_STATE.rateAppPromptDismissed,
     boostActiveUntil:
       partial.boostActiveUntil !== undefined
         ? partial.boostActiveUntil

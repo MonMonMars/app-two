@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navLabels = t().nav;
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-lg flex-col bg-[#0b0b0f]">
+    <div className="mx-auto flex min-h-full w-full max-w-lg flex-col bg-[var(--background)]">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-rose-600 focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white"
@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <header
         role="banner"
-        className="sticky top-0 z-20 border-b border-white/5 bg-[#0b0b0f]/90 px-4 py-3 backdrop-blur-md"
+        className="sticky top-0 z-20 border-b border-[var(--card-border)] bg-[var(--shell-header)] px-4 py-3 backdrop-blur-md"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {!hideNav ? (
         <nav
           aria-label="Primary"
-          className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/5 bg-[#0b0b0f]/95 backdrop-blur-md"
+          className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--card-border)] bg-[var(--shell-header)] backdrop-blur-md"
         >
           <div className="mx-auto flex max-w-lg items-stretch justify-between px-0.5 py-2 safe-area-pb">
             {NAV.map((item) => {

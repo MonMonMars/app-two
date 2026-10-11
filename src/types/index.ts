@@ -76,8 +76,12 @@ export type NotificationSettings = {
   marketing: boolean;
 };
 
+export type ThemePreference = "dark" | "light";
+
 export type AppSettings = {
   notifications: NotificationSettings;
+  theme: ThemePreference;
+  soundEffectsEnabled: boolean;
 };
 
 export type SubscriptionStatus = "none" | "active" | "canceled";
@@ -104,6 +108,7 @@ export type AppPersistedState = {
   matchLastReadAt: Record<string, string>;
   referralShareCount: number;
   softPaywallDismissedDayKey: string | null;
+  rateAppPromptDismissed: boolean;
 };
 
 export type SubscriptionPlan = {

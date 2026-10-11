@@ -58,3 +58,8 @@ export const BOOST_DURATION_MS = 30 * 60 * 1000;
 export const SOFT_PAYWALL_SWIPE_THRESHOLD = 12;
 
 export const MESSAGE_REACTION_EMOJIS = ["❤️", "😂", "🔥"] as const;
+
+/** Soft prompt after this many matches (includes seed matches). */
+export const RATE_APP_MATCH_THRESHOLD = 3;
+
+export const WAITLIST_STORAGE_KEY = "app-two-waitlist-v1";

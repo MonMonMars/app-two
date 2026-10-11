@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import { applyMessageReaction } from "@/lib/message-reactions";
 import { shouldShowSoftPaywall } from "@/lib/paywall-interstitial";
+import { shouldShowRateAppPrompt } from "@/lib/rate-app-prompt";
 import { buildDiscoverDeck } from "@/lib/deck-logic";
 import { createsMutualMatch } from "@/lib/match-logic";
 import {
@@ -120,6 +121,8 @@ type AppContextValue = {
   showSoftPaywallInterstitial: boolean;
   totalSwipeCount: number;
   addMessageReaction: (messageId: string, emoji: string) => void;
+  showRateAppPrompt: boolean;
+  dismissRateAppPrompt: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -574,6 +577,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPersisted((s) => ({ ...s, softPaywallDismissedDayKey: today }));
   }, []);
 
+  const showRateAppPrompt = useMemo(
+    () =>
+      shouldShowRateAppPrompt(
+        visibleMatches.length,
+        persisted.rateAppPromptDismissed,
+      ),
+    [visibleMatches.length, persisted.rateAppPromptDismissed],
+  );
+
+  const dismissRateAppPrompt = useCallback(() => {
+    setPersisted((s) => ({ ...s, rateAppPromptDismissed: true }));
+  }, []);
+
   const recordReferralShare = useCallback(() => {
     setPersisted((s) => ({
       ...s,
@@ -662,6 +678,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dismissSoftPaywall,
     showSoftPaywallInterstitial,
     totalSwipeCount,
+    showRateAppPrompt,
+    dismissRateAppPrompt,
     addMessageReaction,
     messages,
     blockedProfileIds: persisted.blockedProfileIds,

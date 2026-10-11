@@ -1,10 +1,24 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="dark"] {
   --background: #0b0b0f;
   --foreground: #f4f4f5;
   --card: #141419;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --muted: #a1a1aa;
   --accent: #f43f5e;
+  --shell-header: rgba(11, 11, 15, 0.9);
+}
+
+[data-theme="light"] {
+  --background: #f4f4f5;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-border: rgba(24, 24, 27, 0.12);
+  --muted: #52525b;
+  --accent: #e11d48;
+  --shell-header: rgba(244, 244, 245, 0.92);
 }
 
 @theme inline {

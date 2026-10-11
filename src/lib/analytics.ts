@@ -4,7 +4,9 @@ export type AnalyticsEvent =
   | "swipe_like"
   | "match"
   | "paywall_view"
-  | "purchase_mock";
+  | "purchase_mock"
+  | "waitlist_join"
+  | "rate_app_mock";
 
 export type AnalyticsProps = Record<
   string,

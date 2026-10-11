@@ -2,6 +2,10 @@
 
 import { VerificationBadge } from "@/components/verification-badge";
 import { getProfilePhotos } from "@/lib/profile-photos";
+import {
+  isProfileRecentlyActive,
+  recentlyActiveLabel,
+} from "@/lib/recently-active";
 import { showPhotoVerifiedOnProfile } from "@/lib/verification-badge";
 import type { Profile } from "@/types";
 import Image from "next/image";
@@ -114,6 +118,15 @@ export function ProfileCard({
           </>
         ) : null}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+        {isProfileRecentlyActive(profile.id) ? (
+          <div className="pointer-events-none absolute left-4 top-4 z-20 flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 backdrop-blur">
+            <span
+              className="size-1.5 rounded-full bg-emerald-400"
+              aria-hidden
+            />
+            {recentlyActiveLabel()}
+          </div>
+        ) : null}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-5 text-white">
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold">

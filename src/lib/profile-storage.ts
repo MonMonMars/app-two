@@ -29,6 +29,8 @@ export function defaultAppSettings(): AppSettings {
       messages: true,
       marketing: false,
     },
+    theme: "dark",
+    soundEffectsEnabled: true,
   };
 }
 
@@ -102,7 +104,16 @@ export function loadAppSettings(): AppSettings {
     if (!raw) {
       return defaultAppSettings();
     }
-    return { ...defaultAppSettings(), ...JSON.parse(raw) };
+    const defaults = defaultAppSettings();
+    const parsed = JSON.parse(raw) as Partial<AppSettings>;
+    return {
+      ...defaults,
+      ...parsed,
+      notifications: {
+        ...defaults.notifications,
+        ...parsed.notifications,
+      },
+    };
   } catch {
     return defaultAppSettings();
   }

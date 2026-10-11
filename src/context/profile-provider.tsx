@@ -54,6 +54,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       startTransition(() => {
         setDatingProfile(null);
         setDiscoverFilters(null);
+        setSettings(loadAppSettings());
         setHydrated(true);
       });
       return;

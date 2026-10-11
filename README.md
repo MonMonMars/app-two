@@ -26,7 +26,56 @@ npm run dev
 | `npm run format` / `format:check` | Prettier          |
 | `npm run test`                    | Vitest unit tests |
 
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph marketing [Marketing]
+    Landing["/ landing"]
+    Waitlist["Waitlist localStorage"]
+    FAQ["FAQ accordion"]
+  end
+  subgraph auth [Auth gate]
+    Login["/login mock magic link"]
+    Onboarding["/onboarding"]
+  end
+  subgraph shell [Signed-in shell]
+    Discover["/discover SwipeDeck"]
+    Matches["/matches inbox"]
+    Chat["/chat/:id"]
+    Premium["/premium + manage"]
+    Settings["/settings"]
+  end
+  subgraph state [Client state]
+    AuthStore["app-two-auth-v1"]
+    ProfileStore["profile + filters"]
+    AppStore["app-two-state-v1"]
+    SettingsStore["app-two-settings-v1"]
+  end
+  Landing --> Login
+  Login --> AuthStore
+  Onboarding --> ProfileStore
+  Discover --> AppStore
+  Matches --> AppStore
+  Chat --> AppStore
+  Settings --> SettingsStore
+  Waitlist --> Landing
+  FAQ --> Landing
+```
+
 ## Changelog
+
+### Wave 8
+
+- **Waitlist** on landing — mock email capture → `localStorage` list + success UI; `track('waitlist_join')`
+- **FAQ accordion** — monetization & safety copy on landing
+- **Theme toggle** — dark/light via CSS variables (`data-theme`), persisted in Settings
+- **Match sound stub** — optional Web Audio chime on celebration (Settings toggle)
+- **Recently active** — mock badge on Discover cards (deterministic per profile id)
+- **Export my data** — Settings downloads JSON (profile, filters, settings, app state)
+- **Rate App Two** — soft prompt after 3 matches (dismissible, mock `rate_app_mock` event)
+- **65+ Vitest tests** — waitlist, theme, soft paywall, invite, export helpers
+- **README** — architecture diagram (above) + mock vs production table refresh
 
 ### Wave 7
 
@@ -145,6 +194,10 @@ Match **toasts** appear when notification toggle for matches is on (Settings).
 | Auth            | Mock magic link, no email         | SMTP/OAuth, sessions, fraud                             |
 | Payments        | Mock checkout + local tier        | Stripe webhooks, entitlements                           |
 | Referrals       | Copy link + local counter         | Attribution, rewards, fraud                             |
+| Waitlist        | Landing form → localStorage       | ESP, double opt-in, compliance                          |
+| Theme           | `data-theme` CSS variables        | System sync, design tokens                              |
+| Data export     | JSON download from Settings       | GDPR pipelines, server-held data                        |
+| Rate prompt     | After 3 matches, dismissible      | Store APIs, review policies                             |
 | Analytics       | `console.info` in dev             | Consent, pipeline, PII rules                            |
 | Push            | UI stub only                      | FCM/APNs, permissions                                   |
 | Legal           | Placeholder pages                 | Counsel-reviewed policies                               |
