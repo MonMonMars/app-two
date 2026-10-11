@@ -71,8 +71,10 @@ npm run dev
 | 7    | Chat with Sam (seed match)      | Typing, read receipt, 📷 stub, ⋮ safety menu            |
 | 8    | `/likes-you`                    | Blurred grid on Free; Premium shows names               |
 | 9    | Free tier: tap **Rewind**       | Shake + Premium upsell                                  |
-| 10   | `/premium`                      | Tier cards + Stripe stub checkout                       |
-| 11   | `/settings`                     | Block list, notification toggles, mock delete           |
+| 10   | `/premium`                      | Tiers + consumable shop (inventory after mock buy)      |
+| 11   | `/premium/manage`               | Renewal date, cancel / reactivate stubs                 |
+| 12   | Dismiss coach marks on Discover | First-session tips overlay                              |
+| 13   | `/settings`                     | Block list, notification toggles, mock delete           |
 
 ## User flows
 
