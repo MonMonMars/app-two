@@ -1,7 +1,7 @@
 import { DiscoverFiltersPanel } from "@/components/discover-filters-panel";
+import { DiscoverScreen } from "@/components/discover-screen";
 import { SelfPreviewCard } from "@/components/self-preview-card";
 import { StreakBanner } from "@/components/streak-banner";
-import { SwipeDeck } from "@/components/swipe-deck";
 
 export default function DiscoverPage() {
   return (
@@ -9,7 +9,7 @@ export default function DiscoverPage() {
       <StreakBanner />
       <SelfPreviewCard />
       <DiscoverFiltersPanel />
-      <SwipeDeck />
+      <DiscoverScreen />
     </div>
   );
 }

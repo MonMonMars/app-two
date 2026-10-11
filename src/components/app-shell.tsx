@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useApp } from "@/context/app-provider";
 import { useAuth } from "@/context/auth-provider";
 import { useProfile } from "@/context/profile-provider";
+import { t } from "@/i18n";
 
 const NAV = [
-  { href: "/", label: "Discover", icon: "🔥" },
-  { href: "/likes-you", label: "Likes", icon: "💗" },
-  { href: "/matches", label: "Matches", icon: "💬" },
-  { href: "/premium", label: "Premium", icon: "✨" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/discover", labelKey: "discover" as const, icon: "🔥" },
+  { href: "/likes-you", labelKey: "likes" as const, icon: "💗" },
+  { href: "/matches", labelKey: "matches" as const, icon: "💬" },
+  { href: "/premium", labelKey: "premium" as const, icon: "✨" },
+  { href: "/profile", labelKey: "profile" as const, icon: "👤" },
 ] as const;
 
 function tierLabel(tier: string): string {
@@ -34,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/chat/") ||
     pathname.startsWith("/profile/edit") ||
     pathname.startsWith("/settings");
+  const navLabels = t().nav;
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-lg flex-col bg-[#0b0b0f]">
@@ -41,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-rose-400">
-              App Two
+              {t().brand}
             </p>
             <h1 className="truncate text-lg font-bold text-white">
               Hi, {datingProfile?.name ?? user?.displayName ?? "there"}
@@ -66,8 +68,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="mx-auto flex max-w-lg items-stretch justify-between px-0.5 py-2 safe-area-pb">
             {NAV.map((item) => {
               const active =
-                item.href === "/"
-                  ? pathname === "/"
+                item.href === "/discover"
+                  ? pathname === "/discover"
                   : pathname.startsWith(item.href);
               const badge =
                 item.href === "/matches" && matches.length > 0
@@ -91,7 +93,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </span>
                     ) : null}
                   </span>
-                  {item.label}
+                  {navLabels[item.labelKey]}
                 </Link>
               );
             })}

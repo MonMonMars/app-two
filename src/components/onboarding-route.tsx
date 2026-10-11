@@ -20,7 +20,7 @@ export function OnboardingRoute() {
       return;
     }
     if (profileReady && datingProfile?.onboardingComplete) {
-      router.replace("/");
+      router.replace("/discover");
     }
   }, [authReady, profileReady, user, datingProfile, router]);
 

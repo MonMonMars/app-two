@@ -1,3 +1,4 @@
+import { parseAuthUserJson } from "@/lib/auth-session";
 import type { AuthUser } from "@/types";
 
 export const AUTH_STORAGE_KEY = "app-two-auth-v1";
@@ -12,7 +13,7 @@ export function loadAuthUser(): AuthUser | null {
     if (!raw) {
       return null;
     }
-    return JSON.parse(raw) as AuthUser;
+    return parseAuthUserJson(raw);
   } catch {
     return null;
   }

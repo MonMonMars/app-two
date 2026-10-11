@@ -15,7 +15,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (user) {
-      router.replace("/");
+      router.replace("/discover");
     }
   }, [user, router]);
 

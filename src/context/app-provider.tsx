@@ -71,6 +71,9 @@ type AppContextValue = {
   unmatch: (matchId: string) => void;
   reportProfile: (profileId: string, reason: ReportReason) => void;
   resetAppState: () => void;
+  debugResetLocalData: () => void;
+  debugGrantPremium: () => void;
+  debugRefillConsumables: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -472,6 +475,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTypingMatchId(null);
   }, []);
 
+  const debugResetLocalData = useCallback(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("app-two-state-v1");
+    }
+    resetAppState();
+  }, [resetAppState]);
+
+  const debugGrantPremium = useCallback(() => {
+    setPersisted((s) => ({
+      ...s,
+      tier: "premium",
+      boostsRemaining: Math.max(s.boostsRemaining, 3),
+      superLikesRemaining: Math.max(s.superLikesRemaining, 5),
+    }));
+  }, []);
+
+  const debugRefillConsumables = useCallback(() => {
+    setPersisted((s) => ({
+      ...s,
+      boostsRemaining: s.boostsRemaining + 3,
+      superLikesRemaining: s.superLikesRemaining + 5,
+    }));
+  }, []);
+
   const value: AppContextValue = {
     hydrated,
     tier: persisted.tier,
@@ -502,6 +529,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     unmatch,
     reportProfile,
     resetAppState,
+    debugResetLocalData,
+    debugGrantPremium,
+    debugRefillConsumables,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

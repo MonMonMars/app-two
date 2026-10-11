@@ -1,10 +1,13 @@
 "use client";
 
 import { ChatSafetyMenu } from "@/components/chat-safety-menu";
+import { PageError, PageLoading } from "@/components/page-states";
 import { useApp } from "@/context/app-provider";
+import { t } from "@/i18n";
 import { formatRelativeTime } from "@/lib/format";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
 type ChatThreadProps = {
@@ -12,8 +15,15 @@ type ChatThreadProps = {
 };
 
 export function ChatThread({ matchId }: ChatThreadProps) {
-  const { matches, messages, sendMessage, sendImageMessage, typingMatchId } =
-    useApp();
+  const {
+    matches,
+    messages,
+    sendMessage,
+    sendImageMessage,
+    typingMatchId,
+    hydrated,
+  } = useApp();
+  const router = useRouter();
   const [draft, setDraft] = useState("");
 
   const match = matches.find((m) => m.id === matchId);
@@ -27,14 +37,16 @@ export function ChatThread({ matchId }: ChatThreadProps) {
     [messages, matchId],
   );
 
+  if (!hydrated) {
+    return <PageLoading message={t().loading.chat} />;
+  }
+
   if (!match) {
     return (
-      <div className="rounded-2xl bg-zinc-900 p-6 text-center">
-        <p className="text-sm text-zinc-400">Match not found.</p>
-        <Link href="/matches" className="mt-3 inline-block text-rose-400">
-          ← Matches
-        </Link>
-      </div>
+      <PageError
+        message="This match isn't available — it may have been unmatched or blocked."
+        onRetry={() => router.push("/matches")}
+      />
     );
   }
 

@@ -1,13 +1,19 @@
 "use client";
 
 import { EmptyState } from "@/components/empty-state";
+import { PageLoading } from "@/components/page-states";
 import { useApp } from "@/context/app-provider";
+import { t } from "@/i18n";
 import { formatRelativeTime } from "@/lib/format";
 import Image from "next/image";
 import Link from "next/link";
 
 export function MatchList() {
-  const { matches } = useApp();
+  const { matches, hydrated } = useApp();
+
+  if (!hydrated) {
+    return <PageLoading message={t().loading.matches} />;
+  }
 
   if (matches.length === 0) {
     return (
@@ -15,7 +21,7 @@ export function MatchList() {
         emoji="💫"
         title="No matches yet"
         description="When you and someone both like each other, they'll show up here. In this demo, liking Jordan, Riley, Casey, or Taylor always matches."
-        action={{ href: "/", label: "Back to Discover" }}
+        action={{ href: "/discover", label: "Back to Discover" }}
       />
     );
   }

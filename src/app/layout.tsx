@@ -14,9 +14,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "App Two — Dating",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      "https://app-two.example.com",
+  ),
+  title: {
+    default: "App Two — Dating",
+    template: "%s · App Two",
+  },
   description:
     "App Two is a public dating app MVP with swipes, matches, chat, mock auth, and Stripe test-mode monetization stubs.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "App Two",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: [{ url: "/icons/icon-192.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon-192.svg" }],
+  },
+};
+
+export const viewport = {
+  themeColor: "#f43f5e",
 };
 
 export default function RootLayout({

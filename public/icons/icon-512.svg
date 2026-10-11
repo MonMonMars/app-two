@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="App Two">
+  <rect width="512" height="512" rx="96" fill="#0b0b0f"/>
+  <path d="M256 140c-58 0-106 42-106 100 0 74 106 142 106 142s106-68 106-142c0-58-48-100-106-100z" fill="#f43f5e"/>
+  <text x="256" y="448" text-anchor="middle" fill="#fafafa" font-family="system-ui,sans-serif" font-size="48" font-weight="700">App Two</text>
+</svg>

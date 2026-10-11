@@ -153,7 +153,7 @@ export function SwipeDeck() {
           emoji="🎯"
           title="No one fits your filters"
           description="Try widening your distance radius, age range, or clearing interest filters to see more demo profiles."
-          action={{ href: "/", label: "Adjust filters above" }}
+          action={{ href: "/discover", label: "Adjust filters above" }}
         />
       );
     }

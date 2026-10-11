@@ -5,6 +5,8 @@ import { ToastProvider } from "@/context/toast-provider";
 import { AuthGate } from "@/components/auth-gate";
 import { OnboardingGate } from "@/components/onboarding-gate";
 import { AppShell } from "@/components/app-shell";
+import { DebugPanel } from "@/components/debug-panel";
+import { Suspense } from "react";
 
 export function ClientAppRoot({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +15,9 @@ export function ClientAppRoot({ children }: { children: React.ReactNode }) {
         <AppProvider>
           <ToastProvider>
             <AppShell>{children}</AppShell>
+            <Suspense fallback={null}>
+              <DebugPanel />
+            </Suspense>
           </ToastProvider>
         </AppProvider>
       </OnboardingGate>

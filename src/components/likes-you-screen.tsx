@@ -1,19 +1,29 @@
 "use client";
 
 import { EmptyState } from "@/components/empty-state";
+import { PageLoading } from "@/components/page-states";
 import { buttonPrimaryClassName } from "@/components/ui/field-styles";
 import { useApp } from "@/context/app-provider";
+import { t } from "@/i18n";
 import { LIKED_YOU_PROFILE_IDS, profileById } from "@/lib/mock-data";
+import {
+  canSeeLikesYouDetails,
+  likesYouDisplayName,
+} from "@/lib/likes-you-gating";
 import { getProfilePhotos } from "@/lib/profile-photos";
 import Image from "next/image";
 import Link from "next/link";
 
 export function LikesYouScreen() {
-  const { tier } = useApp();
-  const paid = tier === "premium" || tier === "premium_plus";
+  const { tier, hydrated } = useApp();
+  const paid = canSeeLikesYouDetails(tier);
   const profiles = LIKED_YOU_PROFILE_IDS.map((id) => profileById(id)).filter(
     Boolean,
   );
+
+  if (!hydrated) {
+    return <PageLoading message={t().loading.likesYou} />;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -28,7 +38,7 @@ export function LikesYouScreen() {
           href="/premium"
           className={`text-center ${buttonPrimaryClassName}`}
         >
-          Unlock with Premium
+          {t().cta.upgradePremium}
         </Link>
       ) : null}
 
@@ -62,14 +72,14 @@ export function LikesYouScreen() {
                 <p
                   className={`font-semibold text-white ${paid ? "" : "blur-sm"}`}
                 >
-                  {paid ? `${profile.name}, ${profile.age}` : "Someone nearby"}
+                  {likesYouDisplayName(tier, profile.name, profile.age)}
                 </p>
                 {paid ? (
                   <Link
-                    href="/"
+                    href="/discover"
                     className="mt-1 inline-block text-xs font-semibold text-rose-400"
                   >
-                    Swipe on Discover →
+                    {t().cta.openDiscover} →
                   </Link>
                 ) : null}
               </div>
@@ -83,7 +93,7 @@ export function LikesYouScreen() {
           emoji="💗"
           title="No likes yet"
           description="When someone likes you in this demo, they'll appear here."
-          action={{ href: "/", label: "Improve your profile" }}
+          action={{ href: "/discover", label: "Improve your profile" }}
         />
       ) : null}
     </div>

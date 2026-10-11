@@ -10,9 +10,9 @@ cp .env.example .env.local   # optional
 npm run dev
 ```
 
-1. Open [http://localhost:3000/login](http://localhost:3000/login) → mock magic link sign-in
-2. Complete **onboarding** (name, photos, bio, interests, preferences)
-3. **Discover** → swipe, filter, boost → **Matches** → chat → **Premium** / **Profile**
+1. Open [http://localhost:3000/](http://localhost:3000/) — marketing landing (logged out)
+2. **Get started** → mock magic link sign-in at `/login`
+3. Complete **onboarding** → **Discover** at `/discover` → Matches → chat → Premium / Likes You
 
 ## Scripts
 
@@ -28,30 +28,52 @@ npm run dev
 
 ## Changelog
 
+### Wave 4
+
+- **Landing** at `/` for logged-out users (hero, features, CTAs) with SEO + Open Graph placeholders
+- **Shareable profiles** stub at `/u/[id]` (mock public card + sign-in CTA)
+- **QA debug panel** — visible in `development` or with `?debug=1` (grant Premium, refill boosts/Super Likes, reset localStorage)
+- **PWA basics** — `manifest.webmanifest`, SVG icon placeholders, `theme-color`
+- **i18n scaffolding** — English string map (`src/i18n/en.ts`) for brand, nav, CTAs, loading copy
+- **State polish** — shared loading/error shells on Discover, Matches, Likes You, Chat
+- **Tests** — auth session helpers, boost countdown, likes-you gating, debug flag
+- Discover app route moved to **`/discover`** (signed-in experience)
+
 ### Wave 3
 
-- **Discover:** Multi-photo cards (tap sides to swipe photos, dot indicators), lazy-loaded images, fixed card min-height to reduce layout shift
-- **Rewind:** Premium undo last swipe with shake + toast upsell on free tier
-- **Chat:** Typing indicator, mock read receipts, image message stub, report / block / unmatch safety menu
-- **Discover safety:** Report & block from the active card menu
-- **Settings:** Block list with unblock
-- **Likes You** (`/likes-you`): Blurred teaser (free) vs full grid (Premium)
-- **Engagement:** Daily streak banner on Discover (mock, localStorage)
-- **Tests:** Vitest coverage for deck, match, and filter logic
+- Multi-photo Discover cards, Premium rewind, chat safety, Likes You funnel, streak banner, Vitest for deck/match/filter
 
 ### Wave 2
 
 - Onboarding wizard, Discover filters, profile edit, settings, match toasts, boost countdown, Super Like inventory
 
+## Demo script (investors / QA)
+
+| Step | Action                          | What to highlight                                       |
+| ---- | ------------------------------- | ------------------------------------------------------- |
+| 1    | Visit `/` logged out            | Landing hero, monetization-aware bullets, OG-ready meta |
+| 2    | Open `/u/p1`                    | Shareable profile stub (Jordan)                         |
+| 3    | Sign in via `/login`            | Mock magic link, no real email                          |
+| 4    | Finish onboarding               | Preferences feed Discover filters                       |
+| 5    | `/discover?debug=1`             | Debug panel → **Grant Premium**                         |
+| 6    | Swipe Jordan (multi-photo taps) | Match toast → `/matches`                                |
+| 7    | Chat with Sam (seed match)      | Typing, read receipt, 📷 stub, ⋮ safety menu            |
+| 8    | `/likes-you`                    | Blurred grid on Free; Premium shows names               |
+| 9    | Free tier: tap **Rewind**       | Shake + Premium upsell                                  |
+| 10   | `/premium`                      | Tier cards + Stripe stub checkout                       |
+| 11   | `/settings`                     | Block list, notification toggles, mock delete           |
+
 ## User flows
 
 | Flow               | Route                    | Persistence                                       |
 | ------------------ | ------------------------ | ------------------------------------------------- |
+| Landing            | `/`                      | Logged-out marketing; signed-in → `/discover`     |
+| Public profile     | `/u/[id]`                | Mock read-only card                               |
 | Sign in            | `/login`                 | `localStorage` auth + API stubs                   |
 | Onboarding         | `/onboarding`            | Dating profile per user id                        |
-| Discover + filters | `/`                      | Filters + swipe state in `localStorage`           |
+| Discover + filters | `/discover`              | Filters + swipe state in `localStorage`           |
 | Profile edit       | `/profile/edit`          | Updates Discover self-preview card                |
-| Settings           | `/settings`              | Notifications, **block list**, legal, mock delete |
+| Settings           | `/settings`              | Notifications, block list, legal, mock delete     |
 | Likes You          | `/likes-you`             | Free blur vs Premium reveal (demo likes)          |
 | Matches / chat     | `/matches`, `/chat/[id]` | Typing, read receipts, image stub, safety actions |
 | Premium            | `/premium`               | Stripe checkout stub                              |
@@ -86,19 +108,22 @@ Match **toasts** appear when notification toggle for matches is on (Settings).
 
 ## Environment
 
-See [`.env.example`](.env.example). Placeholders = mock purchases and mock auth.
+See [`.env.example`](.env.example). Set `NEXT_PUBLIC_APP_URL` for canonical/OG URLs in production.
 
 ## Layout
 
 ```
 src/app/
+  page.tsx         Marketing landing (logged out)
+  u/[id]/          Shareable public profile stub
   login/           Sign in
   onboarding/      First-run wizard (outside main shell)
-  (main)/          Discover, matches, premium, profile, settings, chat
+  (main)/discover/ Signed-in swipe deck
+  (main)/          matches, premium, profile, settings, chat, likes-you
   api/auth/        Magic-link stubs
   api/stripe/      Checkout + webhook stubs
-src/context/       Auth, profile, app state, toasts
-src/components/    Swipe deck, filters, onboarding, settings, …
+src/i18n/          English string map (scaffolding)
+public/            PWA manifest + icon/OG placeholders
 ```
 
 ## Deploy

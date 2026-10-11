@@ -48,7 +48,7 @@ export function OnboardingWizard() {
       ...draft,
       bio: draft.bio.trim() || "Hey — I'm new on App Two.",
     });
-    router.replace("/");
+    router.replace("/discover");
   };
 
   return (
