@@ -33,7 +33,9 @@ export function WaitlistForm() {
         className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-4 text-sm text-emerald-100"
         role="status"
       >
-        <p className="font-semibold text-emerald-200">You&apos;re on the list!</p>
+        <p className="font-semibold text-emerald-200">
+          You&apos;re on the list!
+        </p>
         <p className="mt-1 text-emerald-100/90">
           Mock waitlist saved in this browser only — no email was sent.
         </p>

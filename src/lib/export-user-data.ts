@@ -34,7 +34,9 @@ export function buildUserDataExport(userId: string): UserDataExportPayload {
   };
 }
 
-export function serializeUserDataExport(payload: UserDataExportPayload): string {
+export function serializeUserDataExport(
+  payload: UserDataExportPayload,
+): string {
   return JSON.stringify(payload, null, 2);
 }
 

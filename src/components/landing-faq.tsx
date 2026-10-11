@@ -4,7 +4,9 @@ import { LANDING_FAQ_ITEMS } from "@/lib/landing-faq";
 import { useState } from "react";
 
 export function LandingFaq() {
-  const [openId, setOpenId] = useState<string | null>(LANDING_FAQ_ITEMS[0]?.id ?? null);
+  const [openId, setOpenId] = useState<string | null>(
+    LANDING_FAQ_ITEMS[0]?.id ?? null,
+  );
 
   return (
     <section className="mt-12" aria-labelledby="faq-heading">
