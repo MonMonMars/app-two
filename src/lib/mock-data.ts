@@ -10,6 +10,8 @@ export const MOCK_PROFILES: Profile[] = [
     interests: ["Hiking", "Photography", "Cooking"],
     photoUrl: "https://picsum.photos/seed/apptwo-jordan/600/800",
     verified: true,
+    gender: "nonbinary",
+    distanceMiles: 2,
   },
   {
     id: "p2",
@@ -20,6 +22,8 @@ export const MOCK_PROFILES: Profile[] = [
     interests: ["Design", "Music", "Travel"],
     photoUrl: "https://picsum.photos/seed/apptwo-sam/600/800",
     verified: true,
+    gender: "man",
+    distanceMiles: 5,
   },
   {
     id: "p3",
@@ -29,6 +33,8 @@ export const MOCK_PROFILES: Profile[] = [
     location: "1 mi away",
     interests: ["Dogs", "Comedy", "Yoga"],
     photoUrl: "https://picsum.photos/seed/apptwo-riley/600/800",
+    gender: "woman",
+    distanceMiles: 1,
   },
   {
     id: "p4",
@@ -39,6 +45,8 @@ export const MOCK_PROFILES: Profile[] = [
     interests: ["Startups", "Surf", "Film"],
     photoUrl: "https://picsum.photos/seed/apptwo-alex/600/800",
     verified: true,
+    gender: "man",
+    distanceMiles: 8,
   },
   {
     id: "p5",
@@ -48,6 +56,8 @@ export const MOCK_PROFILES: Profile[] = [
     location: "3 mi away",
     interests: ["Art", "Books", "Wine"],
     photoUrl: "https://picsum.photos/seed/apptwo-casey/600/800",
+    gender: "woman",
+    distanceMiles: 3,
   },
   {
     id: "p6",
@@ -57,6 +67,8 @@ export const MOCK_PROFILES: Profile[] = [
     location: "4 mi away",
     interests: ["Running", "Podcasts", "Brunch"],
     photoUrl: "https://picsum.photos/seed/apptwo-morgan/600/800",
+    gender: "nonbinary",
+    distanceMiles: 4,
   },
   {
     id: "p7",
@@ -66,6 +78,8 @@ export const MOCK_PROFILES: Profile[] = [
     location: "6 mi away",
     interests: ["Film", "Cycling", "Thai food"],
     photoUrl: "https://picsum.photos/seed/apptwo-taylor/600/800",
+    gender: "woman",
+    distanceMiles: 6,
   },
   {
     id: "p8",
@@ -76,6 +90,8 @@ export const MOCK_PROFILES: Profile[] = [
     interests: ["Wine", "Jazz", "Cheese"],
     photoUrl: "https://picsum.photos/seed/apptwo-quinn/600/800",
     verified: true,
+    gender: "man",
+    distanceMiles: 7,
   },
 ];
 

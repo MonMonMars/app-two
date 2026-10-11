@@ -1,5 +1,8 @@
 "use client";
 
+import { useProfile } from "@/context/profile-provider";
+import { BOOST_DURATION_MS } from "@/lib/constants";
+import { profileMatchesDiscoverFilters } from "@/lib/discover-filter";
 import {
   INITIAL_MATCHES,
   INITIAL_MESSAGES,
@@ -37,7 +40,9 @@ type AppContextValue = {
   tier: SubscriptionTier;
   boostsRemaining: number;
   superLikesRemaining: number;
+  boostActiveUntil: string | null;
   deck: Profile[];
+  deckEmptyReason: "filters" | "caught_up" | null;
   matches: Match[];
   messages: ChatMessage[];
   dailyLikeLimit: number;
@@ -53,6 +58,7 @@ type AppContextValue = {
   activateBoost: () => boolean;
   setPremiumTier: (tier: SubscriptionTier) => void;
   applyProductPurchase: (product: MonetizationProduct) => void;
+  resetAppState: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -77,7 +83,18 @@ function bumpLikes(state: AppPersistedState): AppPersistedState {
   };
 }
 
+function clearExpiredBoost(state: AppPersistedState): AppPersistedState {
+  if (!state.boostActiveUntil) {
+    return state;
+  }
+  if (new Date(state.boostActiveUntil).getTime() <= Date.now()) {
+    return { ...state, boostActiveUntil: null };
+  }
+  return state;
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
+  const { datingProfile, discoverFilters } = useProfile();
   const [hydrated, setHydrated] = useState(false);
   const [persisted, setPersisted] = useState<AppPersistedState>(
     DEFAULT_PERSISTED_STATE,
@@ -91,7 +108,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   } | null>(null);
 
   useEffect(() => {
-    const loaded = loadPersistedState();
+    const loaded = clearExpiredBoost(loadPersistedState());
     startTransition(() => {
       setPersisted(loaded);
       setMatches((prev) => {
@@ -112,13 +129,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!hydrated) {
       return;
     }
-    savePersistedState(persisted);
+    savePersistedState(clearExpiredBoost(persisted));
   }, [persisted, hydrated]);
 
-  const deck = useMemo(() => {
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setPersisted((s) => clearExpiredBoost(s));
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const { deck, deckEmptyReason } = useMemo((): {
+    deck: Profile[];
+    deckEmptyReason: "filters" | "caught_up" | null;
+  } => {
     const seen = new Set([...persisted.passedIds, ...persisted.likedIds]);
-    return MOCK_PROFILES.filter((p) => !seen.has(p.id));
-  }, [persisted.passedIds, persisted.likedIds]);
+    const unseen = MOCK_PROFILES.filter((p) => !seen.has(p.id));
+
+    if (!datingProfile || !discoverFilters) {
+      return { deck: unseen, deckEmptyReason: null };
+    }
+
+    const filtered = unseen.filter((p) =>
+      profileMatchesDiscoverFilters(p, discoverFilters, datingProfile),
+    );
+
+    if (filtered.length === 0 && unseen.length > 0) {
+      return { deck: filtered, deckEmptyReason: "filters" };
+    }
+    if (filtered.length === 0) {
+      return { deck: filtered, deckEmptyReason: "caught_up" };
+    }
+    return { deck: filtered, deckEmptyReason: null };
+  }, [persisted.passedIds, persisted.likedIds, datingProfile, discoverFilters]);
 
   const canLike = useMemo(() => {
     if (hasPaidTier(persisted.tier)) {
@@ -272,9 +315,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (persisted.boostsRemaining <= 0) {
       return false;
     }
+    const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
     setPersisted((s) => ({
       ...s,
       boostsRemaining: s.boostsRemaining - 1,
+      boostActiveUntil: until,
     }));
     return true;
   }, [persisted.boostsRemaining]);
@@ -310,12 +355,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const resetAppState = useCallback(() => {
+    setPersisted(DEFAULT_PERSISTED_STATE);
+    setMatches(INITIAL_MATCHES);
+    setMessages(INITIAL_MESSAGES);
+    setLastSwipe(null);
+  }, []);
+
   const value: AppContextValue = {
     hydrated,
     tier: persisted.tier,
     boostsRemaining: persisted.boostsRemaining,
     superLikesRemaining: persisted.superLikesRemaining,
+    boostActiveUntil: persisted.boostActiveUntil,
     deck,
+    deckEmptyReason,
     matches,
     messages,
     dailyLikeLimit: FREE_DAILY_LIKE_LIMIT,
@@ -328,6 +382,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     activateBoost,
     setPremiumTier,
     applyProductPurchase,
+    resetAppState,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/context/app-provider";
 import { useAuth } from "@/context/auth-provider";
+import { useProfile } from "@/context/profile-provider";
 
 const NAV = [
   { href: "/", label: "Discover", icon: "🔥" },
@@ -27,7 +28,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { tier, matches } = useApp();
   const { user } = useAuth();
-  const hideNav = pathname.startsWith("/chat/");
+  const { datingProfile } = useProfile();
+  const hideNav =
+    pathname.startsWith("/chat/") ||
+    pathname.startsWith("/profile/edit") ||
+    pathname.startsWith("/settings");
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-lg flex-col bg-[#0b0b0f]">
@@ -38,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               App Two
             </p>
             <h1 className="truncate text-lg font-bold text-white">
-              Hi, {user?.displayName ?? "there"}
+              Hi, {datingProfile?.name ?? user?.displayName ?? "there"}
             </h1>
           </div>
           <span

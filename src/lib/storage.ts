@@ -15,6 +15,7 @@ export const DEFAULT_PERSISTED_STATE: AppPersistedState = {
   superLikesRemaining: 1,
   likesUsedToday: 0,
   likesDayKey: todayKey(),
+  boostActiveUntil: null,
 };
 
 export function normalizePersistedState(

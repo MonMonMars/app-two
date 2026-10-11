@@ -1,3 +1,5 @@
+export type GenderIdentity = "woman" | "man" | "nonbinary" | "other";
+
 export type Profile = {
   id: string;
   name: string;
@@ -7,6 +9,8 @@ export type Profile = {
   interests: string[];
   photoUrl: string;
   verified?: boolean;
+  gender?: GenderIdentity;
+  distanceMiles?: number;
 };
 
 export type Match = {
@@ -24,7 +28,6 @@ export type ChatMessage = {
   sentAt: string;
 };
 
-/** Monetization tiers shown in UI (Free is implicit). */
 export type SubscriptionTier = "free" | "premium" | "premium_plus";
 
 export type MonetizationProduct =
@@ -37,6 +40,36 @@ export type AuthUser = {
   createdAt: string;
 };
 
+export type UserDatingProfile = {
+  name: string;
+  age: number;
+  bio: string;
+  photoUrls: string[];
+  interests: string[];
+  gender: GenderIdentity;
+  showMe: GenderIdentity[] | "everyone";
+  ageRangeMin: number;
+  ageRangeMax: number;
+  onboardingComplete: boolean;
+};
+
+export type DiscoverFilters = {
+  maxDistanceMiles: number;
+  ageMin: number;
+  ageMax: number;
+  interestTags: string[];
+};
+
+export type NotificationSettings = {
+  matches: boolean;
+  messages: boolean;
+  marketing: boolean;
+};
+
+export type AppSettings = {
+  notifications: NotificationSettings;
+};
+
 export type AppPersistedState = {
   passedIds: string[];
   likedIds: string[];
@@ -46,6 +79,7 @@ export type AppPersistedState = {
   superLikesRemaining: number;
   likesUsedToday: number;
   likesDayKey: string;
+  boostActiveUntil: string | null;
 };
 
 export type SubscriptionPlan = {
@@ -56,4 +90,12 @@ export type SubscriptionPlan = {
   period: string;
   highlight?: boolean;
   perks: string[];
+};
+
+export type ToastItem = {
+  id: string;
+  title: string;
+  body?: string;
+  href?: string;
+  variant: "match" | "info" | "boost";
 };

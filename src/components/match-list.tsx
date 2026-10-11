@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/empty-state";
 import { useApp } from "@/context/app-provider";
 import { formatRelativeTime } from "@/lib/format";
 import Image from "next/image";
@@ -10,21 +11,12 @@ export function MatchList() {
 
   if (matches.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-zinc-700 bg-zinc-900/50 p-8 text-center">
-        <p className="text-3xl">💫</p>
-        <h2 className="mt-2 text-lg font-semibold text-white">
-          No matches yet
-        </h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Like Jordan, Riley, Casey, or Taylor in Discover to match instantly.
-        </p>
-        <Link
-          href="/"
-          className="mt-4 inline-block rounded-full bg-rose-500 px-4 py-2 text-sm font-semibold text-white"
-        >
-          Start swiping
-        </Link>
-      </div>
+      <EmptyState
+        emoji="💫"
+        title="No matches yet"
+        description="When you and someone both like each other, they'll show up here. In this demo, liking Jordan, Riley, Casey, or Taylor always matches."
+        action={{ href: "/", label: "Back to Discover" }}
+      />
     );
   }
 
@@ -34,7 +26,7 @@ export function MatchList() {
         <li key={match.id}>
           <Link
             href={`/chat/${match.id}`}
-            className="flex items-center gap-3 rounded-2xl border border-white/5 bg-zinc-900/80 p-3 transition hover:border-rose-500/30"
+            className="flex items-center gap-3 rounded-2xl border border-white/5 bg-zinc-900/80 p-3 transition hover:border-rose-500/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
           >
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-rose-500/30">
               <Image
@@ -58,7 +50,9 @@ export function MatchList() {
                 {match.lastMessagePreview ?? "Start the conversation"}
               </p>
             </div>
-            <span className="text-zinc-600">›</span>
+            <span className="text-zinc-600" aria-hidden>
+              ›
+            </span>
           </Link>
         </li>
       ))}

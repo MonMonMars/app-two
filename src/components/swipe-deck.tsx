@@ -1,17 +1,23 @@
 "use client";
 
+import { EmptyState } from "@/components/empty-state";
 import { useApp } from "@/context/app-provider";
+import { useProfile } from "@/context/profile-provider";
+import { useToast } from "@/context/toast-provider";
 import { ProfileCard } from "@/components/profile-card";
+import { formatCountdown, useBoostCountdown } from "@/lib/use-boost-countdown";
 import Link from "next/link";
 import { useCallback, useRef, useState, type PointerEvent } from "react";
 
 export function SwipeDeck() {
   const {
     deck,
+    deckEmptyReason,
     canLike,
     tier,
     boostsRemaining,
     superLikesRemaining,
+    boostActiveUntil,
     likesUsedToday,
     dailyLikeLimit,
     passProfile,
@@ -19,8 +25,10 @@ export function SwipeDeck() {
     activateBoost,
     rewindLastSwipe,
   } = useApp();
+  const { settings } = useProfile();
+  const { pushToast } = useToast();
+  const boostSeconds = useBoostCountdown(boostActiveUntil);
   const [offsetX, setOffsetX] = useState(0);
-  const [matchFlash, setMatchFlash] = useState<string | null>(null);
   const dragStartX = useRef<number | null>(null);
 
   const top = deck[0];
@@ -37,6 +45,21 @@ export function SwipeDeck() {
     [],
   );
 
+  const notifyMatch = useCallback(
+    (name: string) => {
+      if (!settings.notifications.matches) {
+        return;
+      }
+      pushToast({
+        variant: "match",
+        title: `It's a match with ${name}!`,
+        body: "Send a message while the vibe is hot.",
+        href: "/matches",
+      });
+    },
+    [pushToast, settings.notifications.matches],
+  );
+
   const onPass = () => {
     if (!top) return;
     flyOut("left", () => passProfile(top.id));
@@ -48,15 +71,14 @@ export function SwipeDeck() {
     flyOut("right", () => {
       const match = likeProfile(top.id, { super: superLike });
       if (match) {
-        setMatchFlash(match.profile.name);
-        window.setTimeout(() => setMatchFlash(null), 2500);
+        notifyMatch(match.profile.name);
       }
     });
   };
 
   const onPointerDown = (e: PointerEvent<HTMLElement>) => {
     dragStartX.current = e.clientX;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLElement>) => {
@@ -76,36 +98,52 @@ export function SwipeDeck() {
     dragStartX.current = null;
   };
 
+  const onBoost = () => {
+    const ok = activateBoost();
+    if (ok) {
+      pushToast({
+        variant: "boost",
+        title: "Boost activated",
+        body: "You're prioritized in discovery for 30 minutes (mock).",
+      });
+    }
+  };
+
   const paid = tier === "premium" || tier === "premium_plus";
 
   if (!top) {
+    if (deckEmptyReason === "filters") {
+      return (
+        <EmptyState
+          emoji="🎯"
+          title="No one fits your filters"
+          description="Try widening your distance radius, age range, or clearing interest filters to see more demo profiles."
+          action={{ href: "/", label: "Adjust filters above" }}
+        />
+      );
+    }
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-zinc-700 bg-zinc-900/50 p-8 text-center">
-        <p className="text-4xl">🌙</p>
-        <h2 className="text-xl font-semibold text-white">
-          You&apos;re caught up
-        </h2>
-        <p className="text-sm text-zinc-400">
-          More profiles tomorrow — or boost to jump the queue.
-        </p>
-        <Link
-          href="/premium"
-          className="rounded-full bg-gradient-to-r from-rose-500 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white"
-        >
-          Premium & Boosts
-        </Link>
-      </div>
+      <EmptyState
+        emoji="🌙"
+        title="You're caught up for now"
+        description="You've seen everyone in this demo deck. Check Matches or come back after resetting swipes in a future backend version."
+        action={{ href: "/premium", label: "Get a boost" }}
+      />
     );
   }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {matchFlash ? (
-        <div className="animate-match-pop rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
-          It&apos;s a match with {matchFlash}!{" "}
-          <Link href="/matches" className="underline">
-            Message them
-          </Link>
+      {boostSeconds > 0 ? (
+        <div
+          className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-100"
+          role="status"
+        >
+          Boost active ·{" "}
+          <span className="font-mono font-bold">
+            {formatCountdown(boostSeconds)}
+          </span>{" "}
+          remaining
         </div>
       ) : null}
 
@@ -119,7 +157,7 @@ export function SwipeDeck() {
         </div>
       ) : null}
 
-      <div className="relative mx-auto w-full max-w-md flex-1 min-h-[420px]">
+      <div className="relative mx-auto min-h-[420px] w-full max-w-md flex-1">
         {next ? (
           <div className="absolute inset-0 scale-[0.96] opacity-50">
             <ProfileCard profile={next} className="h-full" />
@@ -127,7 +165,7 @@ export function SwipeDeck() {
         ) : null}
         <ProfileCard
           profile={top}
-          className="relative h-full cursor-grab active:cursor-grabbing touch-none"
+          className="relative h-full cursor-grab touch-none active:cursor-grabbing"
           style={{
             transform: `translateX(${offsetX}px) rotate(${offsetX / 22}deg)`,
           }}
@@ -137,71 +175,89 @@ export function SwipeDeck() {
           onPointerCancel={onPointerUp}
         />
         {offsetX > 40 ? (
-          <span className="pointer-events-none absolute left-6 top-8 rotate-[-12deg] rounded-lg border-4 border-emerald-400 px-3 py-1 text-2xl font-black text-emerald-400">
+          <span
+            className="pointer-events-none absolute left-6 top-8 rotate-[-12deg] rounded-lg border-4 border-emerald-400 px-3 py-1 text-2xl font-black text-emerald-400"
+            aria-hidden
+          >
             LIKE
           </span>
         ) : null}
         {offsetX < -40 ? (
-          <span className="pointer-events-none absolute right-6 top-8 rotate-[12deg] rounded-lg border-4 border-zinc-400 px-3 py-1 text-2xl font-black text-zinc-400">
+          <span
+            className="pointer-events-none absolute right-6 top-8 rotate-[12deg] rounded-lg border-4 border-zinc-400 px-3 py-1 text-2xl font-black text-zinc-400"
+            aria-hidden
+          >
             NOPE
           </span>
         ) : null}
       </div>
 
-      <div className="flex items-center justify-center gap-3 pb-2">
+      <div
+        className="flex items-center justify-center gap-3 pb-2"
+        role="group"
+        aria-label="Swipe actions"
+      >
         <button
           type="button"
           onClick={onPass}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-600 bg-zinc-900 text-2xl text-zinc-300 shadow-lg"
-          aria-label="Pass"
+          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-600 bg-zinc-900 text-2xl text-zinc-300 shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
+          aria-label="Pass on this profile"
         >
-          ✕
+          <span aria-hidden>✕</span>
         </button>
         {paid ? (
           <button
             type="button"
             onClick={() => rewindLastSwipe()}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/20 text-lg text-violet-300"
-            aria-label="Rewind"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/20 text-lg text-violet-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
+            aria-label="Rewind last swipe"
           >
-            ↩
+            <span aria-hidden>↩</span>
           </button>
         ) : null}
         <button
           type="button"
           onClick={() => onLike(true)}
           disabled={superLikesRemaining <= 0}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/20 text-lg text-sky-300 disabled:opacity-30"
-          aria-label="Super like"
+          className="flex h-12 w-12 flex-col items-center justify-center rounded-full bg-sky-500/20 text-sky-300 disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+          aria-label={`Super Like. ${superLikesRemaining} remaining`}
         >
-          ★
+          <span className="text-lg leading-none" aria-hidden>
+            ★
+          </span>
+          <span className="text-[10px] font-bold">{superLikesRemaining}</span>
         </button>
         <button
           type="button"
           onClick={() => onLike(false)}
           disabled={!canLike}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-3xl text-white shadow-lg shadow-rose-500/30 disabled:opacity-40"
-          aria-label="Like"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-3xl text-white shadow-lg shadow-rose-500/30 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
+          aria-label="Like this profile"
         >
-          ♥
+          <span aria-hidden>♥</span>
         </button>
       </div>
 
       <div className="flex items-center justify-between text-xs text-zinc-500">
-        <span>Super likes: {superLikesRemaining}</span>
-        {boostsRemaining > 0 ? (
+        <span id="super-like-count">
+          Super likes left: {superLikesRemaining}
+        </span>
+        {boostsRemaining > 0 && boostSeconds <= 0 ? (
           <button
             type="button"
-            className="font-semibold text-rose-400"
-            onClick={() => activateBoost()}
+            className="font-semibold text-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
+            onClick={onBoost}
           >
             Activate boost ({boostsRemaining})
           </button>
-        ) : (
-          <Link href="/premium" className="font-semibold text-rose-400">
+        ) : boostsRemaining <= 0 && boostSeconds <= 0 ? (
+          <Link
+            href="/premium"
+            className="font-semibold text-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
+          >
             Get a boost →
           </Link>
-        )}
+        ) : null}
       </div>
     </div>
   );

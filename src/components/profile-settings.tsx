@@ -2,24 +2,18 @@
 
 import { useApp } from "@/context/app-provider";
 import { useAuth } from "@/context/auth-provider";
+import { useProfile } from "@/context/profile-provider";
 import Link from "next/link";
-import { useState } from "react";
+import { buttonSecondaryClassName } from "@/components/ui/field-styles";
 
 export function ProfileSettings() {
-  const { user, signOut, updateDisplayName } = useAuth();
+  const { user, signOut } = useAuth();
+  const { datingProfile } = useProfile();
   const { tier, likesUsedToday, dailyLikeLimit, boostsRemaining } = useApp();
-  const [name, setName] = useState(user?.displayName ?? "");
-  const [saved, setSaved] = useState(false);
 
   if (!user) {
     return null;
   }
-
-  const onSave = () => {
-    updateDisplayName(name);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2000);
-  };
 
   return (
     <div className="space-y-4">
@@ -28,24 +22,17 @@ export function ProfileSettings() {
           Account
         </p>
         <p className="mt-2 text-sm text-zinc-400">{user.email}</p>
-        <label className="mt-4 block text-sm font-medium text-zinc-300">
-          Display name
-        </label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white outline-none focus:border-rose-500/50"
-        />
-        <button
-          type="button"
-          onClick={onSave}
-          className="mt-3 rounded-full bg-rose-500 px-4 py-2 text-sm font-semibold text-white"
-        >
-          Save
-        </button>
-        {saved ? (
-          <p className="mt-2 text-xs text-emerald-400">Saved locally.</p>
-        ) : null}
+        <p className="mt-2 text-lg font-semibold text-white">
+          {datingProfile?.name ?? user.displayName}
+        </p>
+        <div className="mt-4 flex flex-col gap-2">
+          <Link href="/profile/edit" className={buttonSecondaryClassName}>
+            Edit dating profile
+          </Link>
+          <Link href="/settings" className={buttonSecondaryClassName}>
+            Settings & legal
+          </Link>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 text-sm">
@@ -79,7 +66,7 @@ export function ProfileSettings() {
       <button
         type="button"
         onClick={signOut}
-        className="w-full rounded-full border border-zinc-700 py-3 text-sm font-semibold text-zinc-300"
+        className="w-full rounded-full border border-zinc-700 py-3 text-sm font-semibold text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400"
       >
         Sign out
       </button>
