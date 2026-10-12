@@ -40,6 +40,28 @@ export const strings = {
     likesYou: "Loading likes…",
     chat: "Loading chat…",
   },
+  voice: {
+    entry: "語音",
+    title: "語音通話 · Voice",
+    subtitle: "同 {name} 傾計 · Grok 粵語 realtime",
+    hint: "用粵語自然傾偈。需要麥克風權限；音訊經 xAI Grok Voice（server-side XAI_API_KEY）。",
+    startCall: "開始通話",
+    endCall: "結束",
+    mute: "靜音",
+    unmute: "開麥",
+    close: "Close voice panel",
+    connection: "連線狀態",
+    unconfiguredTitle: "未設定 XAI_API_KEY",
+    unconfiguredBody:
+      "喺 .env.local 加入 XAI_API_KEY（只放 server），然後重啟 dev server。",
+    status: {
+      idle: "待命",
+      connecting: "連接中…",
+      connected: "通話中",
+      disconnecting: "斷線中…",
+      error: "錯誤",
+    },
+  },
 } as const;
 
 export type AppStrings = typeof strings;
