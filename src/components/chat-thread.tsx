@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatSafetyMenu } from "@/components/chat-safety-menu";
+import { VoiceCall } from "@/components/voice-call";
 import { PageError, PageLoading } from "@/components/page-states";
 import { useApp } from "@/context/app-provider";
 import { t } from "@/i18n";
@@ -28,6 +29,7 @@ export function ChatThread({ matchId }: ChatThreadProps) {
   } = useApp();
   const router = useRouter();
   const [draft, setDraft] = useState("");
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const match = matches.find((m) => m.id === matchId);
   const thread = useMemo(
@@ -82,12 +84,27 @@ export function ChatThread({ matchId }: ChatThreadProps) {
             Mock chat · read receipts demo
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setVoiceOpen(true)}
+          className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400"
+          aria-label={t().voice.entry}
+        >
+          {t().voice.entry}
+        </button>
         <ChatSafetyMenu
           matchId={matchId}
           profileId={match.profile.id}
           profileName={match.profile.name}
         />
       </div>
+
+      {voiceOpen ? (
+        <VoiceCall
+          matchName={match.profile.name}
+          onClose={() => setVoiceOpen(false)}
+        />
+      ) : null}
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
         {thread.length === 0 ? (

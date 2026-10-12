@@ -10,6 +10,8 @@ cp .env.example .env.local   # optional
 npm run dev
 ```
 
+**Voice chat (optional):** set `XAI_API_KEY` in `.env.local` (never commit). Open a match chat → **語音** to start a Grok realtime Cantonese voice session (mic + streamed playback). Without the key, the UI shows a configure message instead of crashing.
+
 1. Open [http://localhost:3000/](http://localhost:3000/) — marketing landing (logged out)
 2. **Get started** → mock magic link sign-in at `/login`
 3. Complete **onboarding** → **Discover** at `/discover` → Matches → chat → Premium / Likes You
@@ -191,6 +193,7 @@ Match **toasts** appear when notification toggle for matches is on (Settings).
 | Location        | `distanceMiles` on cards          | GPS / geohash, privacy                                  |
 | Matching        | Deterministic IDs (`p1`, `p3`, …) | Mutual-like graph, ML ranking                           |
 | Chat            | localStorage + auto-replies       | WebSocket, push, media scan                             |
+| Voice chat      | Grok Speech-to-Speech (xAI) when `XAI_API_KEY` set | Peer WebRTC, moderation, recording policy |
 | Auth            | Mock magic link, no email         | SMTP/OAuth, sessions, fraud                             |
 | Payments        | Mock checkout + local tier        | Stripe webhooks, entitlements                           |
 | Referrals       | Copy link + local counter         | Attribution, rewards, fraud                             |
@@ -219,6 +222,7 @@ src/app/
   (main)/          matches, premium, profile, settings, chat, likes-you
   api/auth/        Magic-link stubs
   api/stripe/      Checkout + webhook stubs
+  api/voice/       Grok ephemeral token for realtime voice
 src/i18n/          English string map (scaffolding)
 public/            PWA manifest + icon/OG placeholders
 ```
